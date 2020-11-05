@@ -45,22 +45,22 @@ def create_distro(compose):
 
 def create_global_properties(root, attrib_name, attrib_value):
     global_properties = etree.SubElement(root, "global_properties")
-    global_property = etree.SubElement(global_properties, "global_property", {attrib_name : attrib_value})
-    global_property = etree.SubElement(global_properties, "global_property", {"distro" : create_distro(attrib_value)})
+    global_property = etree.SubElement(global_properties, "global_property", {"name" : attrib_name, "value" : attrib_value})
+    global_property = etree.SubElement(global_properties, "global_property", {"name" : "distro", "value" : create_distro(attrib_value)})
     return root
 
 def create_testcase_properties(testcase, props):
     properties = etree.SubElement(testcase, "properties")
-    prop = etree.SubElement(properties, "property", {"test-case-id" : props[0]})
+    prop = etree.SubElement(properties, "property", {"name" : "test-case-id", "value" : props[0]})
     return testcase
 
 def create_testarch_properties(testarch, props):
     properties = etree.SubElement(testarch, "arch-properties")
-    prop = etree.SubElement(properties, "arch-property", {"host" : props[0]})
+    prop = etree.SubElement(properties, "arch-property", {"name" : "host", "value" : props[0]})
     for key in props[1]:
-        prop = etree.SubElement(properties, "arch-property", {key : props[1][key]})
+        prop = etree.SubElement(properties, "arch-property", {"name" : key, "value" : props[1][key]})
     for item in props[2]:
-        prop = etree.SubElement(properties, "arch-property", {"package" : item})
+        prop = etree.SubElement(properties, "arch-property", {"name" : "package", "value" : item})
 
     return testarch
 
