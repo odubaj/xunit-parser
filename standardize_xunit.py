@@ -40,6 +40,12 @@ def load_tf_xunit(tf_xunit_path):
         tf_xunit = f.read().replace('\\"', '"')
     return tf_xunit
 
+def has_testcases(xml):
+    if hasattr(xml.testsuite[0], 'testcase'):
+        return True
+
+    return False
+
 def create_distro(compose):
     return compose.partition('.')[0].lower()
 
@@ -101,16 +107,20 @@ def process_testcase_package_environment(testcase):
         for testcase_test_env_prop in testcase_test_env.property:
             dictionary[testcase_test_env.attrib["name"]+"-"+testcase_test_env_prop.attrib["name"]] = testcase_test_env_prop.attrib["value"]
 
-    for testcase_package in testcase.packages.package:
-        packages.append(testcase_package.attrib["nvr"])
+    existing_element = testcase.find('.//package')
+    if(existing_element != None):
+        for testcase_package in testcase.packages.package:
+            packages.append(testcase_package.attrib["nvr"])
 
     return (dictionary, packages)
 
 def add_logs(testcase, arch_testsuite, src_url):
-    logs = etree.SubElement(arch_testsuite, "logs")
-    for testcase_log in testcase.logs.log:
-        log = etree.SubElement(logs, "log", name=testcase_log.attrib['name'], value=testcase_log.attrib['href'])
-    log = etree.SubElement(logs, "log", name="test-src-code", value=src_url)
+    existing_element = testcase.find('logs/log')
+    if(existing_element != None):
+        logs = etree.SubElement(arch_testsuite, "logs")
+        for testcase_log in testcase.logs.log:
+            log = etree.SubElement(logs, "log", name=testcase_log.attrib['name'], value=testcase_log.attrib['href'])
+        log = etree.SubElement(logs, "log", name="test-src-code", value=src_url)
 
 def add_system_out(testphase, logs):
     for log in logs.log:
@@ -144,13 +154,30 @@ def add_additional_tag(testphase, result):
 
 def add_test_phases(testcase, arch_testsuite):
     #check if test-phases are not same-named
-    for testcase_phase in testcase.phases.phase:
-        testphase = etree.SubElement(arch_testsuite, "testcase", testcase_phase.attrib)
-        add_system_out(testphase, testcase_phase.logs)
-        add_additional_tag(testphase, testcase_phase.attrib['result'].lower())
+    existing_element = testcase.find('phases/phase')
+    if(existing_element != None):
+        for testcase_phase in testcase.phases.phase:
+            testphase = etree.SubElement(arch_testsuite, "testcase", testcase_phase.attrib)
+            log = testcase_phase.find('logs/log')
+            if(log != None):
+                add_system_out(testphase, testcase_phase.logs)
+            add_additional_tag(testphase, testcase_phase.attrib['result'].lower())
+    else:
+        result_element = testcase.find('properties/property[@{}="{}"]'.format("name", "baseosci.result"))
+        testphase = etree.SubElement(arch_testsuite, "testcase", name="Test")
+        if(result_element != None):
+            add_additional_tag(testphase, result_element.attrib["value"].lower())
+            arch_testsuite.set("result", result_element.attrib["value"])
 
 def add_time(arch_testsuite, time):
     arch_testsuite.set("time", time)
+
+def create_error_output(output_xml):
+    testsuite = etree.SubElement(output_xml, "testsuite", name="error")
+    testcase = etree.SubElement(testsuite, "testcase", name="error", result="ERROR")
+    system_out = etree.SubElement(testcase, "system-out")
+    system_out.text = remove_control_chars('No tests were run.')
+    add_error(testcase)
 
 def main(args):
     """Convert TestingFarm XUnit into the standard JUnit.
@@ -166,65 +193,69 @@ def main(args):
     #for testsuites in input_xml:
         #print (testsuites.tag, testsuites.attrib)
 
-    for testsuite in input_xml.testsuite:
-        #print ("\t"+testsuite.tag, testsuite.attrib)
+    if not has_testcases(input_xml):
+        create_error_output(output_xml)
+    else:
+        for testsuite in input_xml.testsuite:
+            #print ("\t"+testsuite.tag, testsuite.attrib)
 
-        #for testsuite_property in testsuite.properties.property:
-            #print ("\t\t"+testsuite_property.tag, testsuite_property.attrib)
+            #for testsuite_property in testsuite.properties.property:
+                #print ("\t\t"+testsuite_property.tag, testsuite_property.attrib)
 
-        for testcase in testsuite.testcase:
-            #print ("\t\t"+testcase.tag, testcase.attrib)
+            for testcase in testsuite.testcase:
+                #print ("\t\t"+testcase.tag, testcase.attrib)
 
-            # for testcase_properties in testcase.properties:
-            #     print ("\t\t\t"+testcase_properties.tag, testcase_properties.attrib)
+                # for testcase_properties in testcase.properties:
+                #     print ("\t\t\t"+testcase_properties.tag, testcase_properties.attrib)
 
-            #     for testcase_property in testcase_properties.property:
-            #         print ("\t\t\t\t"+testcase_property.tag, testcase_property.attrib)
-                    
-            # for testcase_parameters in testcase.parameters:
-            #     print ("\t\t\t"+testcase_parameters.tag, testcase_parameters.attrib)
+                #     for testcase_property in testcase_properties.property:
+                #         print ("\t\t\t\t"+testcase_property.tag, testcase_property.attrib)
+                        
+                # for testcase_parameters in testcase.parameters:
+                #     print ("\t\t\t"+testcase_parameters.tag, testcase_parameters.attrib)
 
-            #     for testcase_parameter in testcase_parameters.parameter:
-            #         print ("\t\t\t\t"+testcase_parameter.tag, testcase_parameter.attrib)
+                #     for testcase_parameter in testcase_parameters.parameter:
+                #         print ("\t\t\t\t"+testcase_parameter.tag, testcase_parameter.attrib)
 
-            # for testcase_logs in testcase.logs:
-            #     print ("\t\t\t"+testcase_logs.tag, testcase_logs.attrib)
+                # for testcase_logs in testcase.logs:
+                #     print ("\t\t\t"+testcase_logs.tag, testcase_logs.attrib)
 
-            #     for testcase_log in testcase_logs.log:
-            #         print ("\t\t\t\t"+testcase_log.tag, testcase_log.attrib)
+                #     for testcase_log in testcase_logs.log:
+                #         print ("\t\t\t\t"+testcase_log.tag, testcase_log.attrib)
 
-            # for testcase_phases in testcase.phases:
-            #     print ("\t\t\t"+testcase_phases.tag, testcase_phases.attrib)
+                # for testcase_phases in testcase.phases:
+                #     print ("\t\t\t"+testcase_phases.tag, testcase_phases.attrib)
 
-            #     for testcase_phase in testcase_phases.phase:
-            #         print ("\t\t\t\t"+testcase_phase.tag, testcase_phase.attrib)
+                #     for testcase_phase in testcase_phases.phase:
+                #         print ("\t\t\t\t"+testcase_phase.tag, testcase_phase.attrib)
 
-            #         for testcase_phase_logs in testcase_phase.logs:
-            #             print ("\t\t\t\t\t"+testcase_phase_logs.tag, testcase_phase_logs.attrib)
+                #         for testcase_phase_logs in testcase_phase.logs:
+                #             print ("\t\t\t\t\t"+testcase_phase_logs.tag, testcase_phase_logs.attrib)
 
-            #             for testcase_phase_log in testcase_phase_logs.log:
-            #                 print ("\t\t\t\t\t\t"+testcase_phase_log.tag, testcase_phase_log.attrib)
+                #             for testcase_phase_log in testcase_phase_logs.log:
+                #                 print ("\t\t\t\t\t\t"+testcase_phase_log.tag, testcase_phase_log.attrib)
 
-            # for testcase_packages in testcase.packages:
-            #     print ("\t\t\t"+testcase_packages.tag, testcase_packages.attrib)
+                # for testcase_packages in testcase.packages:
+                #     print ("\t\t\t"+testcase_packages.tag, testcase_packages.attrib)
 
-            #     for testcase_package in testcase_packages.package:
-            #         print ("\t\t\t\t"+testcase_package.tag, testcase_package.attrib)
+                #     for testcase_package in testcase_packages.package:
+                #         print ("\t\t\t\t"+testcase_package.tag, testcase_package.attrib)
 
-            # for testcase_test_env in testcase["testing-environment"]:
-            #     print ("\t\t\t"+testcase_test_env.tag, testcase_test_env.attrib)
-            #     if(testcase_test_env.attrib["name"] == "provisioned"):
-            #         for testcase_test_env_prop in testcase_test_env.property:
-            #             print ("\t\t\t\t"+testcase_test_env_prop.tag, testcase_test_env_prop.attrib)
-                    
-            testcase_props = process_testcase_properties(testcase)
-            testcase_package_environment = process_testcase_package_environment(testcase)
-            compose_testsuite = add_non_existing_element(output_xml, 'testsuite', 'compose', testcase_package_environment[0]['provisioned-compose'], 1)
-            testcase_testsuite = add_non_existing_element(compose_testsuite, 'testsuite', 'name', testcase.attrib["name"], 2, (testcase_props['polarion_id'],))
-            arch_testsuite = add_non_existing_element(testcase_testsuite, 'testsuite-arch', 'name', testcase_package_environment[0]['provisioned-arch'], 3, (testcase_props['host'],) + testcase_package_environment)
-            add_time(arch_testsuite, testcase.attrib["time"])
-            add_test_phases(testcase, arch_testsuite)
-            add_logs(testcase, arch_testsuite, testcase_props['test-src-code'])
+                # for testcase_test_env in testcase["testing-environment"]:
+                #     print ("\t\t\t"+testcase_test_env.tag, testcase_test_env.attrib)
+                #     if(testcase_test_env.attrib["name"] == "provisioned"):
+                #         for testcase_test_env_prop in testcase_test_env.property:
+                #             print ("\t\t\t\t"+testcase_test_env_prop.tag, testcase_test_env_prop.attrib)
+                        
+                testcase_props = process_testcase_properties(testcase)
+                testcase_package_environment = process_testcase_package_environment(testcase)
+                compose_testsuite = add_non_existing_element(output_xml, 'testsuite', 'compose', testcase_package_environment[0]['provisioned-compose'], 1)
+                testcase_testsuite = add_non_existing_element(compose_testsuite, 'testsuite', 'name', testcase.attrib["name"], 2, (testcase_props['polarion_id'],))
+                arch_testsuite = add_non_existing_element(testcase_testsuite, 'testsuite-arch', 'name', testcase_package_environment[0]['provisioned-arch'], 3, (testcase_props['host'],) + testcase_package_environment)
+                if('time' in testcase.attrib):
+                    add_time(arch_testsuite, testcase.attrib["time"])
+                add_test_phases(testcase, arch_testsuite)
+                add_logs(testcase, arch_testsuite, testcase_props['test-src-code'])
     
     objectify.deannotate(output_xml, cleanup_namespaces=True, xsi_nil=True)
     print(etree.tostring(output_xml, pretty_print=True).decode())
