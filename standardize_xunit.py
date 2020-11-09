@@ -8,6 +8,7 @@ import time
 import unicodedata
 import re
 import itertools
+import collections
 try:
     import urllib.request as urllib2
 except ImportError:
@@ -152,10 +153,46 @@ def add_additional_tag(testphase, result):
     elif result in ('manual'):
         add_manual(testphase)
 
+def is_samed_named_phases(testcase):
+    names = []
+    for testcase_phase in testcase.phases.phase:
+        names.append(testcase_phase.attrib['name'])
+    
+    len_original = len(names)
+    new_names = list(dict.fromkeys(names))
+    if(len(new_names) == len_original):
+        return (False, [])
+    else:
+        return (True, names)
+
+def find_item_index(name, items):
+    index = 0
+    for item in items:
+        if(item[0] == name):
+            return index
+        index += 1
+
+    return 0
+
+def refactor_phases_names(testcase, names):
+    doubles = [item for item, count in collections.Counter(names).items() if count > 1]
+    items = []
+    for item in doubles:
+        items.append((item, 1))
+
+    for testcase_phase in testcase.phases.phase:
+        if(testcase_phase.attrib['name'] in doubles):
+            index = find_item_index(testcase_phase.attrib['name'], items)
+            testcase_phase.set("name", items[index][0] + str(items[index][1]))
+            items[index] = (items[index][0], items[index][1] + 1)
+
 def add_test_phases(testcase, arch_testsuite):
-    #check if test-phases are not same-named
     existing_element = testcase.find('phases/phase')
     if(existing_element != None):
+        same_named = is_samed_named_phases(testcase)
+        if(same_named[0]):
+            refactor_phases_names(testcase, same_named[1])
+
         for testcase_phase in testcase.phases.phase:
             testphase = etree.SubElement(arch_testsuite, "testcase", testcase_phase.attrib)
             log = testcase_phase.find('logs/log')
