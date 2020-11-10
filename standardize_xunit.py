@@ -28,6 +28,7 @@ def parse_args():
     """Parse arguments."""
     parser = argparse.ArgumentParser(description='Convert TestingFarm XUnit to XUnit accepted by ReportPortal.')
     parser.add_argument('xunit_input', nargs=1, help='TestingFarm XUnit file')
+    parser.add_argument('component_name', nargs=1, help='Name of component')
 
     return parser.parse_args()
 
@@ -81,7 +82,7 @@ def add_non_existing_element(output_xml, elem_type, attrib_name, attrib_value, l
             testcase = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
             return create_testcase_properties(testcase, props)
         else:#testsuite
-            testsuite = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value, 'name' : 'test-plan'})
+            testsuite = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value, 'name' : props[0]})
             return create_global_properties(testsuite, attrib_name, attrib_value)
 
     return existing_element
@@ -224,6 +225,7 @@ def main(args):
     """
     tf_xunit = load_tf_xunit(args.xunit_input[0])
     input_xml = objectify.fromstring(tf_xunit)
+    testsuite_name = args.component_name[0]
 
     output_xml = etree.Element('testsuites')
 
@@ -283,10 +285,10 @@ def main(args):
                 #     if(testcase_test_env.attrib["name"] == "provisioned"):
                 #         for testcase_test_env_prop in testcase_test_env.property:
                 #             print ("\t\t\t\t"+testcase_test_env_prop.tag, testcase_test_env_prop.attrib)
-                        
+                               
                 testcase_props = process_testcase_properties(testcase)
                 testcase_package_environment = process_testcase_package_environment(testcase)
-                compose_testsuite = add_non_existing_element(output_xml, 'testsuite', 'compose', testcase_package_environment[0]['provisioned-compose'], 1)
+                compose_testsuite = add_non_existing_element(output_xml, 'testsuite', 'compose', testcase_package_environment[0]['provisioned-compose'], 1, (testsuite_name,))
                 testcase_testsuite = add_non_existing_element(compose_testsuite, 'testsuite', 'name', testcase.attrib["name"], 2, (testcase_props['polarion_id'],))
                 arch_testsuite = add_non_existing_element(testcase_testsuite, 'testsuite-arch', 'name', testcase_package_environment[0]['provisioned-arch'], 3, (testcase_props['host'],) + testcase_package_environment)
                 if('time' in testcase.attrib):
