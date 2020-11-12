@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#TODO
 #treba ziskat info o scratch-buildoch a buidoch cez taskinfo -> brew taskinfo -v <task-id> + brew buildinfo <nvr> -> mas tu aj meno aj verziu, release, len to rozparsuj pekne
 #poriesit userov a ich prihlasovanie cez curl
 #poriesit jednotlive baliky aby boli ich vysledky importnute do spravnych projektov
@@ -7,7 +8,7 @@
 #email server nastavit
 #containery su nejake divne co sa tyka nvr a build_id
 
-
+# get UI authentification token
 function get_ui_token() {
   local username=$1
   local password=$2
@@ -21,6 +22,7 @@ function get_ui_token() {
 
 }
 
+# get API authentification token
 function get_api_token() {
   local ui_token=$1
 
@@ -40,6 +42,7 @@ function get_api_token() {
   fi
 }
 
+# import XML file to ReportPortal
 function import_xunit() {
     local project=$1
     local api_token=$2
@@ -61,15 +64,18 @@ RP_URL="http://localhost:8080" #"http://reportportal.infrastructure.testing-farm
 TMP_FILE="output.xml"
 TASKINFO_FILE="taskinfo.txt"
 
+# get data from TestingFarm Xunit
 TASK_ID=$(grep "property name=\"baseosci.artifact-id\" value=" ${FILE} | cut -d'"' -f4)
 ZIP_NAME=$(grep "BASEOS_CI_COMPONENT=" ${FILE} | head -n 1 | cut -d'"' -f2)
 
+# get data about the task from brew
 brew taskinfo -v $TASK_ID > $TASKINFO_FILE
 NVR=$(grep "Build: " $TASKINFO_FILE | cut -d' ' -f2)
 BUILD_ID=$(grep "Build: " $TASKINFO_FILE | cut -d' ' -f3 | tr -d '()')
 
 ZIP_FILE=$ZIP_NAME.zip
 
+# resolve scratch builds
 if [ -z $BUILD_ID ] || [ -z $NVR ]
 then
   ZIP_FILE=$ZIP_NAME-scratch.zip
@@ -84,10 +90,12 @@ then
   fi
 fi
 
+# create custom Xunit for ReportPortal
 python3 standardize_xunit.py $FILE $ZIP_NAME $NVR $BUILD_ID > $TMP_FILE
 
 zip -r $ZIP_FILE $TMP_FILE
 
+# import data with appropriate tokens
 UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})
 
 API_TOKEN=$(get_api_token ${UI_TOKEN})

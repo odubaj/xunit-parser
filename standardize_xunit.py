@@ -28,30 +28,30 @@ def parse_args():
     """Parse arguments."""
     parser = argparse.ArgumentParser(description='Convert TestingFarm XUnit to XUnit accepted by ReportPortal.')
     parser.add_argument('xunit_input', nargs=1, help='TestingFarm XUnit file')
-    parser.add_argument('data', nargs=3, help='Data of component')
+    parser.add_argument('data', nargs=3, help='Data of the given CI task')
 
     return parser.parse_args()
 
 def load_tf_xunit(tf_xunit_path):
-    """Load TestingFarm XUnit file.
-    :param tf_xunit_path: str, path to the TF Xunit file
-    :return: str, content of the XUnit file
-    """
+    """Load TestingFarm XUnit file."""
     with open(tf_xunit_path) as f:
         # remove escaping which makes the file invalid for xml parsers
         tf_xunit = f.read().replace('\\"', '"')
     return tf_xunit
 
 def has_testcases(xml):
+    """Check if TestingFarm XUnit file has correct format"""
     if hasattr(xml.testsuite[0], 'testcase'):
         return True
 
     return False
 
 def create_distro(compose):
+    """Extract distribution from compose"""
     return compose.partition('.')[0].lower()
 
 def create_global_properties(root, dictionary, compose):
+    """Creates global properties for ReportPortal XUnit"""
     global_properties = etree.SubElement(root, "global_properties")
     for key in dictionary:
         if (key == "name"):
@@ -63,11 +63,13 @@ def create_global_properties(root, dictionary, compose):
     return root
 
 def create_testcase_properties(testcase, props):
+    """Creates testcase properties for ReportPortal XUnit"""
     properties = etree.SubElement(testcase, "properties")
     prop = etree.SubElement(properties, "property", {"name" : "test-case-id", "value" : props[0]})
     return testcase
 
 def create_testarch_properties(testarch, props):
+    """Creates testarch properties for ReportPortal XUnit"""
     properties = etree.SubElement(testarch, "arch-properties")
     prop = etree.SubElement(properties, "arch-property", {"name" : "host", "value" : props[0]})
     for key in props[1]:
@@ -77,22 +79,11 @@ def create_testarch_properties(testarch, props):
 
     return testarch
 
-# def add_non_existing_element(output_xml, elem_type, attrib_name, attrib_value, level, props = ()):
-#     existing_element = output_xml.find('.//{}[@{}="{}"]'.format(elem_type, attrib_name, attrib_value))
-#     if(existing_element == None):
-#         if (level == 3):#arch
-#             testarch = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
-#             return create_testarch_properties(testarch, props)
-#         elif (level == 2):#testcase
-#             testcase = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
-#             return create_testcase_properties(testcase, props)
-#         else:#testsuite
-#             testsuite = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value, 'name' : props[0]})
-#             return create_global_properties(testsuite, attrib_name, attrib_value)
-
-#     return existing_element
-
 def add_non_existing_compose_element(output_xml, compose_name, dictionary):
+    """Checks if compose testsuite already exists in ReportPortal XUnit,
+    if no, it creates it,
+    if yes, returns reference on it
+    """
     existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite", "compose", compose_name))
     if(existing_element == None):
         testsuite = etree.SubElement(output_xml, "testsuite", compose=compose_name, name=dictionary["name"])
@@ -101,6 +92,10 @@ def add_non_existing_compose_element(output_xml, compose_name, dictionary):
     return existing_element
 
 def add_non_existing_testcase_element(output_xml, testcase_name, props):
+    """Checks if testcase testsuite already exists in ReportPortal XUnit,
+    if no, it creates it,
+    if yes, returns reference on it
+    """
     existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite", "name", testcase_name))
     if(existing_element == None):
         testcase = etree.SubElement(output_xml, "testsuite", name=testcase_name)
@@ -109,6 +104,10 @@ def add_non_existing_testcase_element(output_xml, testcase_name, props):
     return existing_element
 
 def add_non_existing_arch_element(output_xml, arch_name, props):
+    """Checks if architecture testsuite already exists in ReportPortal XUnit,
+    if no, it creates it,
+    if yes, returns reference on it
+    """
     existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite-arch", "name", arch_name))
     if(existing_element == None):
         testarch = etree.SubElement(output_xml, "testsuite-arch", name=arch_name)
@@ -117,6 +116,7 @@ def add_non_existing_arch_element(output_xml, arch_name, props):
     return existing_element
 
 def process_testcase_properties(testcase):
+    """Processes testcase properties of TestingFarm XUnit"""
     dictionary = {}
     for testcase_property in testcase.properties.property:
         if(testcase_property.attrib["name"] == "baseosci.host"):
@@ -129,9 +129,11 @@ def process_testcase_properties(testcase):
     return dictionary
 
 def remove_control_chars(s):
+    """Removes control chars from given string"""
     return control_char_re.sub('', s)
 
 def process_testcase_package_environment(testcase):
+    """Processes testcase packages and testing environments of TestingFarm XUnit"""
     dictionary = {}
     packages = []
     for testcase_test_env in testcase["testing-environment"]:
@@ -146,6 +148,7 @@ def process_testcase_package_environment(testcase):
     return (dictionary, packages)
 
 def add_logs(testcase, arch_testsuite, src_url):
+    """Creates links to logs of given testcase for ReportPortal XUnit"""
     existing_element = testcase.find('logs/log')
     if(existing_element != None):
         logs = etree.SubElement(arch_testsuite, "logs")
@@ -154,6 +157,7 @@ def add_logs(testcase, arch_testsuite, src_url):
         log = etree.SubElement(logs, "log", name="test-src-code", value=src_url)
 
 def add_system_out(testphase, logs):
+    """Creates detailed logs of given testphase for ReportPortal XUnit"""
     for log in logs.log:
         system_out = etree.SubElement(testphase, "system-out")
         # text_string = ""
@@ -162,18 +166,23 @@ def add_system_out(testphase, logs):
         system_out.text = remove_control_chars(log.attrib['href'])
 
 def add_failure(testphase):
+    """Creates failure element for ReportPortal XUnit"""
     failure = etree.SubElement(testphase, 'failure', type='FAIL')
 
 def add_error(testphase):
+    """Creates error element for ReportPortal XUnit"""
     error = etree.SubElement(testphase, 'error', type='ERROR')
 
 def add_skipped(testphase):
+    """Creates skipped element for ReportPortal XUnit"""
     skipped = etree.SubElement(testphase, 'skipped', type='SKIPPED')
 
 def add_manual(testphase):
+    """Creates manual element for ReportPortal XUnit"""
     manual = etree.SubElement(testphase, 'manual', type='MANUAL')
 
 def add_additional_tag(testphase, result):
+    """Creates additional tags of testcase result statuses for ReportPortal XUnit"""
     if result in ('failed', 'fail'):
         add_failure(testphase)
     elif result in ('error', 'errored'):
@@ -184,6 +193,7 @@ def add_additional_tag(testphase, result):
         add_manual(testphase)
 
 def is_samed_named_phases(testcase):
+    """Checks if testcase phases are not samed-named in TestingFarm XUnit"""
     names = []
     for testcase_phase in testcase.phases.phase:
         names.append(testcase_phase.attrib['name'])
@@ -196,6 +206,7 @@ def is_samed_named_phases(testcase):
         return (True, names)
 
 def find_item_index(name, items):
+    """Finds index of an item by name in array"""
     index = 0
     for item in items:
         if(item[0] == name):
@@ -205,6 +216,7 @@ def find_item_index(name, items):
     return 0
 
 def refactor_phases_names(testcase, names):
+    """Refactors names of testphases of TestingFarm XUnit"""
     doubles = [item for item, count in collections.Counter(names).items() if count > 1]
     items = []
     for item in doubles:
@@ -217,6 +229,7 @@ def refactor_phases_names(testcase, names):
             items[index] = (items[index][0], items[index][1] + 1)
 
 def add_test_phases(testcase, arch_testsuite):
+    """Creates testphases of testcases for ReportPortal XUnit"""
     existing_element = testcase.find('phases/phase')
     if(existing_element != None):
         same_named = is_samed_named_phases(testcase)
@@ -236,10 +249,11 @@ def add_test_phases(testcase, arch_testsuite):
             add_additional_tag(testphase, result_element.attrib["value"].lower())
             arch_testsuite.set("result", result_element.attrib["value"])
 
-def add_time(arch_testsuite, time):
-    arch_testsuite.set("time", time)
+# def add_time(arch_testsuite, time):
+#     arch_testsuite.set("time", time)
 
 def create_error_output(output_xml):
+    """Creates error output if TestingFarm XUnit does not have appropriate format"""
     testsuite = etree.SubElement(output_xml, "testsuite", name="error")
     testcase = etree.SubElement(testsuite, "testcase", name="error", result="ERROR")
     system_out = etree.SubElement(testcase, "system-out")
@@ -247,10 +261,8 @@ def create_error_output(output_xml):
     add_error(testcase)
 
 def main(args):
-    """Convert TestingFarm XUnit into the standard JUnit.
+    """Convert TestingFarm XUnit into the ReportPortal XUnit.
     The results will be printed to the stdout.
-    :param args: parsed args
-    :return: None
     """
     tf_xunit = load_tf_xunit(args.xunit_input[0])
     input_xml = objectify.fromstring(tf_xunit)
@@ -324,8 +336,8 @@ def main(args):
                 compose_testsuite = add_non_existing_compose_element(output_xml, testcase_package_environment[0]['provisioned-compose'], global_props_dict)
                 testcase_testsuite = add_non_existing_testcase_element(compose_testsuite, testcase.attrib["name"], (testcase_props['polarion_id'],))
                 arch_testsuite = add_non_existing_arch_element(testcase_testsuite, testcase_package_environment[0]['provisioned-arch'], (testcase_props['host'],) + testcase_package_environment)
-                if('time' in testcase.attrib):
-                    add_time(arch_testsuite, testcase.attrib["time"])
+                # if('time' in testcase.attrib):
+                #     add_time(arch_testsuite, testcase.attrib["time"])
                 add_test_phases(testcase, arch_testsuite)
                 add_logs(testcase, arch_testsuite, testcase_props['test-src-code'])
     
