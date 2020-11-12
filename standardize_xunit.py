@@ -28,7 +28,7 @@ def parse_args():
     """Parse arguments."""
     parser = argparse.ArgumentParser(description='Convert TestingFarm XUnit to XUnit accepted by ReportPortal.')
     parser.add_argument('xunit_input', nargs=1, help='TestingFarm XUnit file')
-    parser.add_argument('component_name', nargs=1, help='Name of component')
+    parser.add_argument('data', nargs=3, help='Data of component')
 
     return parser.parse_args()
 
@@ -51,10 +51,15 @@ def has_testcases(xml):
 def create_distro(compose):
     return compose.partition('.')[0].lower()
 
-def create_global_properties(root, attrib_name, attrib_value):
+def create_global_properties(root, dictionary, compose):
     global_properties = etree.SubElement(root, "global_properties")
-    global_property = etree.SubElement(global_properties, "global_property", {"name" : attrib_name, "value" : attrib_value})
-    global_property = etree.SubElement(global_properties, "global_property", {"name" : "distro", "value" : create_distro(attrib_value)})
+    for key in dictionary:
+        if (key == "name"):
+            continue
+        global_property = etree.SubElement(global_properties, "global_property", {"name" : key, "value" : dictionary[key]})
+    global_property = etree.SubElement(global_properties, "global_property", {"name" : "compose", "value" : compose})
+    global_property = etree.SubElement(global_properties, "global_property", {"name" : "distro", "value" : create_distro(compose)})
+
     return root
 
 def create_testcase_properties(testcase, props):
@@ -72,18 +77,42 @@ def create_testarch_properties(testarch, props):
 
     return testarch
 
-def add_non_existing_element(output_xml, elem_type, attrib_name, attrib_value, level, props = ()):
-    existing_element = output_xml.find('.//{}[@{}="{}"]'.format(elem_type, attrib_name, attrib_value))
+# def add_non_existing_element(output_xml, elem_type, attrib_name, attrib_value, level, props = ()):
+#     existing_element = output_xml.find('.//{}[@{}="{}"]'.format(elem_type, attrib_name, attrib_value))
+#     if(existing_element == None):
+#         if (level == 3):#arch
+#             testarch = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
+#             return create_testarch_properties(testarch, props)
+#         elif (level == 2):#testcase
+#             testcase = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
+#             return create_testcase_properties(testcase, props)
+#         else:#testsuite
+#             testsuite = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value, 'name' : props[0]})
+#             return create_global_properties(testsuite, attrib_name, attrib_value)
+
+#     return existing_element
+
+def add_non_existing_compose_element(output_xml, compose_name, dictionary):
+    existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite", "compose", compose_name))
     if(existing_element == None):
-        if (level == 3):#arch
-            testarch = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
-            return create_testarch_properties(testarch, props)
-        elif (level == 2):#testcase
-            testcase = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value})
-            return create_testcase_properties(testcase, props)
-        else:#testsuite
-            testsuite = etree.SubElement(output_xml, elem_type, {attrib_name : attrib_value, 'name' : props[0]})
-            return create_global_properties(testsuite, attrib_name, attrib_value)
+        testsuite = etree.SubElement(output_xml, "testsuite", compose=compose_name, name=dictionary["name"])
+        return create_global_properties(testsuite, dictionary, compose_name)
+
+    return existing_element
+
+def add_non_existing_testcase_element(output_xml, testcase_name, props):
+    existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite", "name", testcase_name))
+    if(existing_element == None):
+        testcase = etree.SubElement(output_xml, "testsuite", name=testcase_name)
+        return create_testcase_properties(testcase, props)
+
+    return existing_element
+
+def add_non_existing_arch_element(output_xml, arch_name, props):
+    existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite-arch", "name", arch_name))
+    if(existing_element == None):
+        testarch = etree.SubElement(output_xml, "testsuite-arch", name=arch_name)
+        return create_testarch_properties(testarch, props)
 
     return existing_element
 
@@ -225,7 +254,11 @@ def main(args):
     """
     tf_xunit = load_tf_xunit(args.xunit_input[0])
     input_xml = objectify.fromstring(tf_xunit)
-    testsuite_name = args.component_name[0]
+
+    global_props_dict = {}
+    global_props_dict["name"] = args.data[0]
+    global_props_dict["nvr"] = args.data[1]
+    global_props_dict["build-id"] = args.data[2]
 
     output_xml = etree.Element('testsuites')
 
@@ -288,9 +321,9 @@ def main(args):
                                
                 testcase_props = process_testcase_properties(testcase)
                 testcase_package_environment = process_testcase_package_environment(testcase)
-                compose_testsuite = add_non_existing_element(output_xml, 'testsuite', 'compose', testcase_package_environment[0]['provisioned-compose'], 1, (testsuite_name,))
-                testcase_testsuite = add_non_existing_element(compose_testsuite, 'testsuite', 'name', testcase.attrib["name"], 2, (testcase_props['polarion_id'],))
-                arch_testsuite = add_non_existing_element(testcase_testsuite, 'testsuite-arch', 'name', testcase_package_environment[0]['provisioned-arch'], 3, (testcase_props['host'],) + testcase_package_environment)
+                compose_testsuite = add_non_existing_compose_element(output_xml, testcase_package_environment[0]['provisioned-compose'], global_props_dict)
+                testcase_testsuite = add_non_existing_testcase_element(compose_testsuite, testcase.attrib["name"], (testcase_props['polarion_id'],))
+                arch_testsuite = add_non_existing_arch_element(testcase_testsuite, testcase_package_environment[0]['provisioned-arch'], (testcase_props['host'],) + testcase_package_environment)
                 if('time' in testcase.attrib):
                     add_time(arch_testsuite, testcase.attrib["time"])
                 add_test_phases(testcase, arch_testsuite)
