@@ -281,56 +281,7 @@ def main(args):
         create_error_output(output_xml)
     else:
         for testsuite in input_xml.testsuite:
-            #print ("\t"+testsuite.tag, testsuite.attrib)
-
-            #for testsuite_property in testsuite.properties.property:
-                #print ("\t\t"+testsuite_property.tag, testsuite_property.attrib)
-
             for testcase in testsuite.testcase:
-                #print ("\t\t"+testcase.tag, testcase.attrib)
-
-                # for testcase_properties in testcase.properties:
-                #     print ("\t\t\t"+testcase_properties.tag, testcase_properties.attrib)
-
-                #     for testcase_property in testcase_properties.property:
-                #         print ("\t\t\t\t"+testcase_property.tag, testcase_property.attrib)
-                        
-                # for testcase_parameters in testcase.parameters:
-                #     print ("\t\t\t"+testcase_parameters.tag, testcase_parameters.attrib)
-
-                #     for testcase_parameter in testcase_parameters.parameter:
-                #         print ("\t\t\t\t"+testcase_parameter.tag, testcase_parameter.attrib)
-
-                # for testcase_logs in testcase.logs:
-                #     print ("\t\t\t"+testcase_logs.tag, testcase_logs.attrib)
-
-                #     for testcase_log in testcase_logs.log:
-                #         print ("\t\t\t\t"+testcase_log.tag, testcase_log.attrib)
-
-                # for testcase_phases in testcase.phases:
-                #     print ("\t\t\t"+testcase_phases.tag, testcase_phases.attrib)
-
-                #     for testcase_phase in testcase_phases.phase:
-                #         print ("\t\t\t\t"+testcase_phase.tag, testcase_phase.attrib)
-
-                #         for testcase_phase_logs in testcase_phase.logs:
-                #             print ("\t\t\t\t\t"+testcase_phase_logs.tag, testcase_phase_logs.attrib)
-
-                #             for testcase_phase_log in testcase_phase_logs.log:
-                #                 print ("\t\t\t\t\t\t"+testcase_phase_log.tag, testcase_phase_log.attrib)
-
-                # for testcase_packages in testcase.packages:
-                #     print ("\t\t\t"+testcase_packages.tag, testcase_packages.attrib)
-
-                #     for testcase_package in testcase_packages.package:
-                #         print ("\t\t\t\t"+testcase_package.tag, testcase_package.attrib)
-
-                # for testcase_test_env in testcase["testing-environment"]:
-                #     print ("\t\t\t"+testcase_test_env.tag, testcase_test_env.attrib)
-                #     if(testcase_test_env.attrib["name"] == "provisioned"):
-                #         for testcase_test_env_prop in testcase_test_env.property:
-                #             print ("\t\t\t\t"+testcase_test_env_prop.tag, testcase_test_env_prop.attrib)
-                               
                 testcase_props = process_testcase_properties(testcase)
                 testcase_package_environment = process_testcase_package_environment(testcase)
                 compose_testsuite = add_non_existing_compose_element(output_xml, testcase_package_environment[0]['provisioned-compose'], global_props_dict)
