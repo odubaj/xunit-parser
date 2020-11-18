@@ -8,8 +8,6 @@
 #email server nastavit
 #containery su nejake divne co sa tyka nvr a build_id
 
-# get UI authentification token
-
 #core-services-db team components
 core_services_db=("classloader-leak-test-framework gd gdbm libnsl2 nss_nis rdate yp-tools ypbind ypserv
                   dejagnu gc less libatomic_ops libconfig libdb mutt galera Judy mariadb mariadb-connector-c 
@@ -42,6 +40,7 @@ ruby=("aspell aspell-en compat-libtiff3 dblatex execstack exempi gdisk giflib gr
       rubygem-rspec-support rubygem-thread_order python-distro libuv nodejs nodejs-nodemon nodejs-packaging 
       uglify-js web-assets")
 
+# get project by component name
 function get_project() {
   local component=$1
 
@@ -52,10 +51,11 @@ function get_project() {
   elif [[ " ${ruby[@]} " =~ " ${component} " ]]; then
     echo "ruby"
   else
-    echo "arch"
+    echo "default"
   fi
 }
 
+# get UI authentification token
 function get_ui_token() {
   local username=$1
   local password=$2
