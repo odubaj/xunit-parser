@@ -106,7 +106,7 @@ USERNAME=$1
 PASSWORD=$2
 FILE=$3
 
-RP_URL="http://localhost:8080" #"http://reportportal.infrastructure.testing-farm.io"
+RP_URL="http://reportportal.infrastructure.testing-farm.io"
 TMP_FILE="output.xml"
 TASKINFO_FILE="taskinfo.txt"
 
@@ -146,8 +146,6 @@ zip -r $ZIP_FILE $TMP_FILE
 UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})
 
 API_TOKEN=$(get_api_token ${UI_TOKEN})
-
-echo $PROJECT_NEW
 
 IMPORT=$(import_xunit ${PROJECT} ${API_TOKEN} ${ZIP_FILE})
 echo $IMPORT
