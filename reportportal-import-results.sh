@@ -5,7 +5,7 @@
 
 # If we're not running on the staging Jenkins, do nothing.
 if [ "$JENKINS_MASTER_URL" != "https://baseos-stg-jenkins.rhev-ci-vms.eng.rdu2.redhat.com" ]; then
-    exit 1
+    exit 0
 fi
 
 XUNIT_ORIGINAL="results.xml"
@@ -20,6 +20,4 @@ wget $SCRIPT_URL/$PARSER
 chmod +x $IMPORT_SCRIPT
 
 ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL
-
-rm $IMPORT_SCRIPT $PARSER
 

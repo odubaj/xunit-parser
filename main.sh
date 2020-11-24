@@ -151,5 +151,5 @@ API_TOKEN=$(get_api_token ${UI_TOKEN})
 IMPORT=$(import_xunit ${PROJECT} ${API_TOKEN} ${ZIP_FILE})
 echo $IMPORT
 
-rm $ZIP_FILE $TASKINFO_FILE
+rm $ZIP_FILE
 
