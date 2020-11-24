@@ -5,4 +5,4 @@ if [ "$JENKINS_MASTER_URL" != "https://baseos-stg-jenkins.rhev-ci-vms.eng.rdu2.r
     exit 0
 fi
 
-CITOOL_EXTRA_DOCKER_ARGS="--entrypoint /bin/bash" /var/lib/jenkins/citool-container.sh -c "cd /WORKDIR && /WORKDIR/reportportal-import-results.sh"
+CITOOL_EXTRA_DOCKER_ARGS="--entrypoint /bin/bash" /var/lib/jenkins/citool-container.sh -c "reportportal-import-results.sh"
