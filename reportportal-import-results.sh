@@ -3,11 +3,6 @@
 # Script which downloads import and parser scripts, executes them and creates
 # new XUnit reportportal-results.xml
 
-# If we're not running on the staging Jenkins, do nothing.
-if [ "$JENKINS_MASTER_URL" != "https://baseos-stg-jenkins.rhev-ci-vms.eng.rdu2.redhat.com" ]; then
-    exit 0
-fi
-
 XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 PARSER="standardize_xunit.py"
