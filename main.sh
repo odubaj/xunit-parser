@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #TODO
+# pridat v importe do regularnych buildov tag non-scratch aby bolo mozne lahko filtrovat v historii
 #treba ziskat info o scratch-buildoch a buidoch cez taskinfo -> brew taskinfo -v <task-id> + brew buildinfo <nvr> -> mas tu aj meno aj verziu, release, len to rozparsuj pekne
 #poriesit userov a ich prihlasovanie cez curl
 #poriesit jednotlive baliky aby boli ich vysledky importnute do spravnych projektov
@@ -107,7 +108,7 @@ PASSWORD=$2
 FILE=$3
 
 RP_URL="http://reportportal.infrastructure.testing-farm.io"
-TMP_FILE="output.xml"
+TMP_FILE="reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"
 
 # get data from TestingFarm Xunit
