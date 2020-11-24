@@ -10,9 +10,10 @@ IMPORT_SCRIPT="main.sh"
 PARSER="standardize_xunit.py"
 USER="superadmin"
 PASSWORD="erebus"
+SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 
-wget https://raw.githubusercontent.com/odubaj/xunit-parser/master/$IMPORT_SCRIPT
-wget https://raw.githubusercontent.com/odubaj/xunit-parser/master/$PARSER
+wget $SCRIPT_URL/$IMPORT_SCRIPT
+wget $SCRIPT_URL/$PARSER
 chmod +x $IMPORT_SCRIPT
 
 ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL
