@@ -18,8 +18,6 @@ from pprint import pprint
 from lxml import etree
 from lxml import objectify
 
-import requests
-
 # build regular expression to find unicode control (non-printable) characters in a string (minus CR-LF)
 control_chars = ''.join([chr(x) for x in itertools.chain(range(0x00,0x20), range(0x7f,0xa0)) if x not in [0x0d, 0x0a]])
 control_char_re = re.compile('[%s]' % re.escape(control_chars))
