@@ -26,7 +26,7 @@ def parse_args():
     """Parse arguments."""
     parser = argparse.ArgumentParser(description='Convert TestingFarm XUnit to XUnit accepted by ReportPortal.')
     parser.add_argument('xunit_input', nargs=1, help='TestingFarm XUnit file')
-    parser.add_argument('data', nargs=3, help='Data of the given CI task')
+    parser.add_argument('data', nargs=5, help='Data of the given CI task')
 
     return parser.parse_args()
 
@@ -269,6 +269,8 @@ def main(args):
     global_props_dict["name"] = args.data[0]
     global_props_dict["nvr"] = args.data[1]
     global_props_dict["build-id"] = args.data[2]
+    global_props_dict["task-id"] = args.data[3]
+    global_props_dict["scratch-build"] = args.data[4]
 
     output_xml = etree.Element('testsuites')
 
