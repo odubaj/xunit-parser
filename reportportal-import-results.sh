@@ -7,7 +7,7 @@ XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 PARSER="standardize_xunit.py"
 USER="superadmin"
-PASSWORD="erebus"
+PASSWORD="aQsWdEfR1029"
 SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 
 wget $SCRIPT_URL/$IMPORT_SCRIPT
