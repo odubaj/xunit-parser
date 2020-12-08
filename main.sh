@@ -106,6 +106,7 @@ function import_xunit() {
 USERNAME=$1
 PASSWORD=$2
 FILE=$3
+ZIP_NAME=$4
 
 RP_URL="http://reportportal.infrastructure.testing-farm.io"
 TMP_FILE="reportportal-results.xml"
@@ -114,7 +115,7 @@ SCRATCH="false"
 
 # get data from TestingFarm Xunit
 TASK_ID=$(grep "property name=\"baseosci.artifact-id\" value=" ${FILE} | cut -d'"' -f4)
-ZIP_NAME=$(grep "BASEOS_CI_COMPONENT=" ${FILE} | head -n 1 | cut -d'"' -f2)
+#ZIP_NAME=$(grep "BASEOS_CI_COMPONENT=" ${FILE} | head -n 1 | cut -d'"' -f2)
 PROJECT=$(get_project ${ZIP_NAME})
 
 # get data about the task from brew
