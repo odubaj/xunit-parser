@@ -107,38 +107,31 @@ USERNAME=$1
 PASSWORD=$2
 FILE=$3
 ZIP_NAME=$4
+SCRATCH=$5
+NVR=$6
+TASK_ID=$7
 
 RP_URL="http://reportportal.infrastructure.testing-farm.io"
 TMP_FILE="reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"
-SCRATCH="false"
 
-# get data from TestingFarm Xunit
-TASK_ID=$(grep "property name=\"baseosci.artifact-id\" value=" ${FILE} | cut -d'"' -f4)
-#ZIP_NAME=$(grep "BASEOS_CI_COMPONENT=" ${FILE} | head -n 1 | cut -d'"' -f2)
+# resolve correct project
 PROJECT=$(get_project ${ZIP_NAME})
 
 # get data about the task from brew
-brew taskinfo -v $TASK_ID > $TASKINFO_FILE
-NVR=$(grep "Build: " $TASKINFO_FILE | cut -d' ' -f2)
-BUILD_ID=$(grep "Build: " $TASKINFO_FILE | cut -d' ' -f3 | tr -d '()')
+#brew taskinfo -v $TASK_ID > $TASKINFO_FILE
+BUILD_ID="unknown" #$(grep "Build: " $TASKINFO_FILE | cut -d' ' -f3 | tr -d '()')
 
 ZIP_FILE=$ZIP_NAME.zip
 
-# resolve scratch builds
-if [ -z $BUILD_ID ] || [ -z $NVR ]
+if [ $SCRATCH == "true" ]
 then
   ZIP_FILE=$ZIP_NAME-scratch.zip
-  SCRATCH="true"
-  if [ -z $BUILD_ID ]
-  then
-    BUILD_ID="scratch"
-  fi
+fi
 
-  if [ -z $NVR ]
-  then
-    NVR="scatch"
-  fi
+if [ -z $BUILD_ID ]
+then
+  BUILD_ID="unknown"
 fi
 
 # create custom Xunit for ReportPortal

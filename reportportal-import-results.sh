@@ -16,22 +16,36 @@ USER="superadmin"
 PASSWORD="aQsWdEfR1029"
 SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON="datagrepper.json"
-UMB_URL=""
+UMB_URL=$1
 VERSION_PATTERN="0\.1\.[0-9]*"
 URL_PATTERN="http[s]*:*"
-COMPONENT=""
-
-# TODO: tu treba ziskat url, ktore spadaju pod topicy
 
 curl -s $UMB_URL > $DATAGREPPER_JSON
+
+category=$(cat $DATAGREPPER_JSON | jq -r .msg.category)
+if [ $category != "functional" ] ; then
+    echo "non-functional tests"
+    rm $DATAGREPPER_JSON;
+    exit 0;
+fi
+
+quality_engineering=$(cat $DATAGREPPER_JSON | jq -r .msg.ci.email)
+if [ $quality_engineering != "baseos-ci@redhat.com" ] ; then
+    echo "bad QE"
+    rm $DATAGREPPER_JSON;
+    exit 0;
+fi
+
 xunit_version=$(cat $DATAGREPPER_JSON | jq -r .msg.version)
 if [ -z $xunit_version ] || [[ ! $xunit_version =~ $VERSION_PATTERN ]]; then
+    echo "bad version"
     rm $DATAGREPPER_JSON;
     exit 0;
 fi
 
 HASH=$(cat $DATAGREPPER_JSON | jq -r .msg.xunit)
 if [ -z $HASH ] || [ $HASH == "null" ] ; then
+    echo "no xunit"
     rm $DATAGREPPER_JSON;
     exit 0;
 fi
@@ -39,14 +53,17 @@ fi
 if [[ $HASH =~ $URL_PATTERN ]]; then
     curl -s $HASH > $XUNIT_ORIGINAL
 else
-    python3 -c "import zlib,base64; print(zlib.decompress(base64.b64decode($HASH)))" > $XUNIT_ORIGINAL
+    python3 -c "import zlib,base64; print(zlib.decompress(base64.b64decode('$HASH')).decode('utf-8') )" > $XUNIT_ORIGINAL
 fi
 
-COMPONENT=HASH=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.component)
+COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.component)
+SCRATCH=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
+NVR=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.nvr)
+TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
 
 wget $SCRIPT_URL/$IMPORT_SCRIPT
 wget $SCRIPT_URL/$PARSER
 chmod +x $IMPORT_SCRIPT
 
-./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT
+./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID
 
