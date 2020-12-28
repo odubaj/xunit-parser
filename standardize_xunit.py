@@ -242,6 +242,12 @@ def add_test_phases(testcase, arch_testsuite):
             if(log != None):
                 add_system_out(testphase, testcase_phase.logs)
             add_additional_tag(testphase, testcase_phase.attrib['result'].lower())
+            if(testcase_phase.attrib['result'].lower() == 'manual'):
+                props_arch = arch_testsuite.find('arch-properties')
+                if(props_arch != None):
+                    prop_exists = props_arch.find('arch-property[@name="manual"]')
+                    if(prop_exists == None):
+                        arch_prop = etree.SubElement(props_arch, "arch-property", name="manual", value="manual")
     else:
         result_element = testcase.find('properties/property[@{}="{}"]'.format("name", "baseosci.result"))
         testphase = etree.SubElement(arch_testsuite, "testcase", name="Test")
@@ -294,6 +300,14 @@ def main(args):
                 add_logs(testcase, arch_testsuite, testcase_props['test-src-code'])
                 add_test_phases(testcase, arch_testsuite)
     
+    for compose_testsuite in output_xml:
+         for testcase_testsuite in compose_testsuite:
+            is_manual = testcase_testsuite.find('.//arch-property[@name="manual"]')
+            if(is_manual != None):
+                testcase_testsuite_props = testcase_testsuite.find('properties')
+                if(testcase_testsuite_props != None):
+                    testcase_testsuite_manual_property = etree.SubElement(testcase_testsuite_props, "property", name="manual", value="manual")
+
     objectify.deannotate(output_xml, cleanup_namespaces=True, xsi_nil=True)
     print(etree.tostring(output_xml, pretty_print=True).decode())
 
