@@ -96,7 +96,7 @@ def add_non_existing_testcase_element(output_xml, testcase_name, props):
     """
     existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite", "name", testcase_name))
     if(existing_element == None):
-        testcase = etree.SubElement(output_xml, "testsuite", name=testcase_name)
+        testcase = etree.SubElement(output_xml, "testsuite", name=testcase_name, id=testcase_name)
         return create_testcase_properties(testcase, props)
 
     return existing_element
@@ -108,7 +108,7 @@ def add_non_existing_arch_element(output_xml, arch_name, props):
     """
     existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite-arch", "name", arch_name))
     if(existing_element == None):
-        testarch = etree.SubElement(output_xml, "testsuite-arch", name=arch_name)
+        testarch = etree.SubElement(output_xml, "testsuite-arch", name=arch_name, id=output_xml.attrib["name"]+"/"+arch_name)
         return create_testarch_properties(testarch, props)
 
     return existing_element
@@ -238,6 +238,10 @@ def add_test_phases(testcase, arch_testsuite):
 
         for testcase_phase in testcase.phases.phase:
             testphase = etree.SubElement(arch_testsuite, "testcase", testcase_phase.attrib)
+            if('name' in testcase.attrib):
+                testphase.set("id", testcase.attrib["name"]+"/"+arch_testsuite.attrib["name"]+"/"+testcase_phase.attrib["name"])
+            if('name' in arch_testsuite.attrib):
+                testphase.set("arch", arch_testsuite.attrib["name"])
             log = testcase_phase.find('logs/log')
             if(log != None):
                 add_system_out(testphase, testcase_phase.logs)
