@@ -149,10 +149,12 @@ def add_logs(testcase, arch_testsuite, src_url):
     """Creates links to logs of given testcase for ReportPortal XUnit"""
     existing_element = testcase.find('logs/log')
     if(existing_element != None):
-        logs = etree.SubElement(arch_testsuite, "logs")
+        #logs = etree.SubElement(arch_testsuite, "logs")
         for testcase_log in testcase.logs.log:
-            log = etree.SubElement(logs, "log", name=testcase_log.attrib['name'], value=testcase_log.attrib['href'])
-        log = etree.SubElement(logs, "log", name="test-src-code", value=src_url)
+            log = etree.SubElement(arch_testsuite, "system-out")
+            log.text = remove_control_chars(testcase_log.attrib['href'])
+        log = etree.SubElement(arch_testsuite, "system-out")
+        log.text = remove_control_chars(src_url)
 
 def add_system_out(testphase, logs):
     """Creates detailed logs of given testphase for ReportPortal XUnit"""
@@ -289,8 +291,8 @@ def main(args):
                 arch_testsuite = add_non_existing_arch_element(testcase_testsuite, testcase_package_environment[0]['provisioned-arch'], (testcase_props['host'],) + testcase_package_environment)
                 # if('time' in testcase.attrib):
                 #     add_time(arch_testsuite, testcase.attrib["time"])
-                add_test_phases(testcase, arch_testsuite)
                 add_logs(testcase, arch_testsuite, testcase_props['test-src-code'])
+                add_test_phases(testcase, arch_testsuite)
     
     objectify.deannotate(output_xml, cleanup_namespaces=True, xsi_nil=True)
     print(etree.tostring(output_xml, pretty_print=True).decode())
