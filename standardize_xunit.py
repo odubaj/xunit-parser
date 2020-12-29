@@ -89,14 +89,14 @@ def add_non_existing_compose_element(output_xml, compose_name, dictionary):
 
     return existing_element
 
-def add_non_existing_testcase_element(output_xml, testcase_name, props):
+def add_non_existing_testcase_element(output_xml, testcase_name, props, src_url):
     """Checks if testcase testsuite already exists in ReportPortal XUnit,
     if no, it creates it,
     if yes, returns reference on it
     """
     existing_element = output_xml.find('.//{}[@{}="{}"]'.format("testsuite", "name", testcase_name))
     if(existing_element == None):
-        testcase = etree.SubElement(output_xml, "testsuite", name=testcase_name, id=testcase_name)
+        testcase = etree.SubElement(output_xml, "testsuite", name=testcase_name, id=testcase_name, href=src_url)
         return create_testcase_properties(testcase, props)
 
     return existing_element
@@ -145,7 +145,7 @@ def process_testcase_package_environment(testcase):
 
     return (dictionary, packages)
 
-def add_logs(testcase, arch_testsuite, src_url):
+def add_logs(testcase, arch_testsuite):
     """Creates links to logs of given testcase for ReportPortal XUnit"""
     existing_element = testcase.find('logs/log')
     if(existing_element != None):
@@ -153,8 +153,6 @@ def add_logs(testcase, arch_testsuite, src_url):
         for testcase_log in testcase.logs.log:
             log = etree.SubElement(arch_testsuite, "system-out")
             log.text = remove_control_chars(testcase_log.attrib['href'])
-        log = etree.SubElement(arch_testsuite, "system-out")
-        log.text = remove_control_chars(src_url)
 
 def add_system_out(testphase, logs):
     """Creates detailed logs of given testphase for ReportPortal XUnit"""
@@ -297,11 +295,11 @@ def main(args):
                 testcase_props = process_testcase_properties(testcase)
                 testcase_package_environment = process_testcase_package_environment(testcase)
                 compose_testsuite = add_non_existing_compose_element(output_xml, testcase_package_environment[0]['provisioned-compose'], global_props_dict)
-                testcase_testsuite = add_non_existing_testcase_element(compose_testsuite, testcase.attrib["name"], (testcase_props['polarion_id'],))
+                testcase_testsuite = add_non_existing_testcase_element(compose_testsuite, testcase.attrib["name"], (testcase_props['polarion_id'],), testcase_props['test-src-code'])
                 arch_testsuite = add_non_existing_arch_element(testcase_testsuite, testcase_package_environment[0]['provisioned-arch'], (testcase_props['host'],) + testcase_package_environment)
                 # if('time' in testcase.attrib):
                 #     add_time(arch_testsuite, testcase.attrib["time"])
-                add_logs(testcase, arch_testsuite, testcase_props['test-src-code'])
+                add_logs(testcase, arch_testsuite)
                 add_test_phases(testcase, arch_testsuite)
     
     for compose_testsuite in output_xml:
