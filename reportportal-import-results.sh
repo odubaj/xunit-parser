@@ -13,6 +13,7 @@ XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 PARSER="standardize_xunit.py"
 USER="superadmin"
+# tuto zmena
 PASSWORD="erebus"
 SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON="datagrepper.json"

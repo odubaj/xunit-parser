@@ -144,7 +144,7 @@ TASK_ID=$7
 TEST_PLAN_NAME=$8
 ISSUER=$9
 
-RP_URL="http://localhost:8080"
+RP_URL="http://localhost:8080" #tuto zmena
 TMP_FILE="reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"
 
@@ -177,23 +177,25 @@ UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})
 
 API_TOKEN=$(get_api_token ${UI_TOKEN})
 
-#find launch with same task-id
+#find launch with same task-id # tuto zmena
 FOUND=$(get_launch_by_task_id merge ${API_TOKEN} ${TASK_ID})
 #echo $FOUND
 number_to_merge=$(echo $FOUND | jq '.page.totalElements' --raw-output)
 
-#import new launch
+#import new launch # tuto zmena
 IMPORT=$(import_xunit merge ${API_TOKEN} ${ZIP_FILE} | jq '.message' --raw-output | cut -d' ' -f5)
 #echo $IMPORT
 
 #merge launches
 if [ $number_to_merge != 0 ]
 then
+  # tuto zmena
   IMPORTED=$(get_launch_by_uuid merge ${API_TOKEN} ${IMPORT} | jq '.content' --raw-output)
   #echo $IMPORTED
   #merge_string='{"launches":[76,77,78],"mergeType":"BASIC","name":"merge","description":"","endTime":1609228254450,"startTime":1609228244313,"attributes":[{"key":"scratch-build","value":"false"}],"extendSuitesDescription":false}'
   FOUND=$(echo $FOUND | jq '.content' --raw-output)
   merge_string=$(python3 merge_launches.py "$FOUND" "$IMPORTED")
+  # tuto zmena
   MERGED=$(merge_launches merge ${API_TOKEN} "${merge_string}")
   echo $MERGED
 fi
