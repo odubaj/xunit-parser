@@ -13,7 +13,7 @@ XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 PARSER="standardize_xunit.py"
 USER="superadmin"
-PASSWORD="aQsWdEfR1029"
+PASSWORD="erebus"
 SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON="datagrepper.json"
 UMB_URL=$1
@@ -60,10 +60,14 @@ COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.component)
 SCRATCH=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
 NVR=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.nvr)
 TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
+namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
+type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
+TEST_PLAN_NAME=$namespace.$type."functional"
+ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 
-wget $SCRIPT_URL/$IMPORT_SCRIPT
-wget $SCRIPT_URL/$PARSER
+#wget $SCRIPT_URL/$IMPORT_SCRIPT
+#wget $SCRIPT_URL/$PARSER
 chmod +x $IMPORT_SCRIPT
 
-./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID
+./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
 

@@ -70,6 +70,37 @@ function get_ui_token() {
 
 }
 
+# get launch with appropiate task-id
+function get_launch_by_task_id() {
+  local project=$1
+  local api_token=$2
+  local task_id=$3
+
+  echo $(curl -X GET "${RP_URL}/api/v1/${project}/launch?filter.has.attributeKey=task-id&filter.has.attributeValue=${task_id}" -H  "accept: */*" \
+        -H "Authorization: Bearer $api_token")
+}
+
+# get launch with appropiate uuid
+function get_launch_by_uuid() {
+  local project=$1
+  local api_token=$2
+  local uuid=$3
+
+  echo $(curl -X GET "${RP_URL}/api/v1/${project}/launch?filter.eq.uuid=${uuid}" -H  "accept: */*" \
+        -H "Authorization: Bearer $api_token")
+}
+
+# merge two launches
+function merge_launches() {
+  local project=$1
+  local api_token=$2
+  local data=$3
+
+  echo $(curl -X POST "${RP_URL}/api/v1/${project}/launch/merge" -H  "accept: */*" -H  "Content-Type: application/json" \
+        -H "Authorization: Bearer $api_token" \
+        -d "$data")
+}
+
 # get API authentification token
 function get_api_token() {
   local ui_token=$1
@@ -110,8 +141,10 @@ ZIP_NAME=$4
 SCRATCH=$5
 NVR=$6
 TASK_ID=$7
+TEST_PLAN_NAME=$8
+ISSUER=$9
 
-RP_URL="http://reportportal.infrastructure.testing-farm.io"
+RP_URL="http://localhost:8080"
 TMP_FILE="reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"
 
@@ -135,7 +168,7 @@ then
 fi
 
 # create custom Xunit for ReportPortal
-python3 standardize_xunit.py $FILE $ZIP_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH > $TMP_FILE
+python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER > $TMP_FILE
 
 zip -r $ZIP_FILE $TMP_FILE
 
@@ -144,8 +177,26 @@ UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})
 
 API_TOKEN=$(get_api_token ${UI_TOKEN})
 
-IMPORT=$(import_xunit ${PROJECT} ${API_TOKEN} ${ZIP_FILE})
-echo $IMPORT
+#find launch with same task-id
+FOUND=$(get_launch_by_task_id merge ${API_TOKEN} ${TASK_ID})
+#echo $FOUND
+number_to_merge=$(echo $FOUND | jq '.page.totalElements' --raw-output)
+
+#import new launch
+IMPORT=$(import_xunit merge ${API_TOKEN} ${ZIP_FILE} | jq '.message' --raw-output | cut -d' ' -f5)
+#echo $IMPORT
+
+#merge launches
+if [ $number_to_merge != 0 ]
+then
+  IMPORTED=$(get_launch_by_uuid merge ${API_TOKEN} ${IMPORT} | jq '.content' --raw-output)
+  #echo $IMPORTED
+  #merge_string='{"launches":[76,77,78],"mergeType":"BASIC","name":"merge","description":"","endTime":1609228254450,"startTime":1609228244313,"attributes":[{"key":"scratch-build","value":"false"}],"extendSuitesDescription":false}'
+  FOUND=$(echo $FOUND | jq '.content' --raw-output)
+  merge_string=$(python3 merge_launches.py "$FOUND" "$IMPORTED")
+  MERGED=$(merge_launches merge ${API_TOKEN} "${merge_string}")
+  echo $MERGED
+fi
 
 rm $ZIP_FILE
 
