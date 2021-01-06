@@ -12,6 +12,7 @@
 XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
+ERROR_SCRIPT="error.sh"
 PARSER="standardize_xunit.py"
 USER="superadmin"
 # tuto zmena
@@ -73,12 +74,16 @@ ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER
 #wget $SCRIPT_URL/$RUNNING_SCRIPT
+#wget $SCRIPT_URL/$ERROR_SCRIPT
 chmod +x $IMPORT_SCRIPT
 chmod +x $RUNNING_SCRIPT
+chmod +x $ERROR_SCRIPT
 
 if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
     ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
-else
+elif [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.running" ] ; then
     ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
+else
+    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $TASK_ID $TEST_PLAN_NAME
 fi
 

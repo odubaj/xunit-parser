@@ -149,7 +149,7 @@ function stop_delete_item() {
   echo $(curl -X PUT "${RP_URL}/api/v1/${project}/item/${item_uuid}" \
         -H  "accept: */*" -H  "Content-Type: application/json" \
         -H "Authorization: Bearer $api_token" \
-        -d '{"endTime":"'$time'","launchUuid":"'$found_launch_uuid'", "status": "PASSED"}')
+        -d '{"endTime":"'$time'","launchUuid":"'$launch_uuid'", "status": "PASSED"}')
 
   echo $(curl -X DELETE "${RP_URL}/api/v1/${project}/item/${item_id}" \
         -H  "accept: */*" \
@@ -215,6 +215,18 @@ function create_test_suite() {
         -d '{"name":"'$name'","startTime":"'$time'","type":"suite","launchUuid":"'$launch_uuid'","description":"","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"nvr","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}]}')
 }
 
-test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${created_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
+# stop running item with error
+function stop_error_item() {
+  local project=$1
+  local api_token=$2
+  local launch_uuid=$3
+  local item_uuid=$4
+  local time=$(echo $(($(date +%s%N)/1000000)))
+
+  echo $(curl -X PUT "${RP_URL}/api/v1/${project}/item/${item_uuid}" \
+        -H  "accept: */*" -H  "Content-Type: application/json" \
+        -H "Authorization: Bearer $api_token" \
+        -d '{"endTime":"'$time'","launchUuid":"'$launch_uuid'", "status": "FAILED","description":"Infrastructure Error during testing","issue":{"autoAnalyzed": false,"ignoreAnalyzer": true,"issueType":"si001"}}')
+}
 
 RP_URL="http://localhost:8080" #tuto zmena
