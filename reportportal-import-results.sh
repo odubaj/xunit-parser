@@ -11,6 +11,7 @@
 
 XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
+RUNNING_SCRIPT="script.sh"
 PARSER="standardize_xunit.py"
 USER="superadmin"
 # tuto zmena
@@ -44,17 +45,20 @@ if [ -z $xunit_version ] || [[ ! $xunit_version =~ $VERSION_PATTERN ]]; then
     exit 0;
 fi
 
-HASH=$(cat $DATAGREPPER_JSON | jq -r .msg.xunit)
-if [ -z $HASH ] || [ $HASH == "null" ] ; then
-    echo "no xunit"
-    rm $DATAGREPPER_JSON;
-    exit 0;
-fi
+topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
+if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
+    HASH=$(cat $DATAGREPPER_JSON | jq -r .msg.xunit)
+    if [ -z $HASH ] || [ $HASH == "null" ] ; then
+        echo "no xunit"
+        rm $DATAGREPPER_JSON;
+        exit 0;
+    fi
 
-if [[ $HASH =~ $URL_PATTERN ]]; then
-    curl -s $HASH > $XUNIT_ORIGINAL
-else
-    python3 -c "import zlib,base64; print(zlib.decompress(base64.b64decode('$HASH')).decode('utf-8') )" > $XUNIT_ORIGINAL
+    if [[ $HASH =~ $URL_PATTERN ]]; then
+        curl -s $HASH > $XUNIT_ORIGINAL
+    else
+        python3 -c "import zlib,base64; print(zlib.decompress(base64.b64decode('$HASH')).decode('utf-8') )" > $XUNIT_ORIGINAL
+    fi
 fi
 
 COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.component)
@@ -68,7 +72,13 @@ ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER
+#wget $SCRIPT_URL/$RUNNING_SCRIPT
 chmod +x $IMPORT_SCRIPT
+chmod +x $RUNNING_SCRIPT
 
-./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
+if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
+    ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
+else
+    ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
+fi
 
