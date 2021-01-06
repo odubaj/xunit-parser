@@ -101,6 +101,49 @@ function merge_launches() {
         -d "$data")
 }
 
+# find item
+function get_item_by_filter() {
+  local project=$1
+  local api_token=$2
+  local task_id=$3
+  local name=$4
+  local launch_id=$5
+
+  echo $(curl -X GET "${RP_URL}/api/v1/${project}/item?filter.has.attributeKey=task-id&filter.has.attributeValue=${task_id}&filter.eq.launchId=${launch_id}&filter.eq.name=${name}&filter.eq.status=IN_PROGRESS&isLatest=false&launchesLimit=0" \
+        -H "accept: */*" \
+        -H "Authorization: Bearer $api_token")
+}
+
+# find item uuid
+function get_item_uuid() {
+  local project=$1
+  local api_token=$2
+  local item_id=$3
+
+  echo $(curl -X GET "${RP_URL}/api/v1/${project}/item/items?ids=${item_id}" \
+        -H  "accept: */*" \
+        -H "Authorization: Bearer $api_token")
+}
+
+# stop and delete running item
+function stop_delete_item() {
+  local project=$1
+  local api_token=$2
+  local launch_uuid=$3
+  local item_id=$4
+  local item_uuid=$5
+  local time=$(echo $(($(date +%s%N)/1000000)))
+
+  echo $(curl -X PUT "${RP_URL}/api/v1/${project}/item/${item_uuid}" \
+        -H  "accept: */*" -H  "Content-Type: application/json" \
+        -H "Authorization: Bearer $api_token" \
+        -d '{"endTime":"'$time'","launchUuid":"'$found_launch_uuid'", "status": "PASSED"}')
+
+  echo $(curl -X DELETE "${RP_URL}/api/v1/${project}/item/${item_id}" \
+        -H  "accept: */*" \
+        -H "Authorization: Bearer $api_token")
+}
+
 # get API authentification token
 function get_api_token() {
   local ui_token=$1
@@ -176,22 +219,44 @@ zip -r $ZIP_FILE $TMP_FILE
 UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})
 
 API_TOKEN=$(get_api_token ${UI_TOKEN})
+echo $API_TOKEN
 
 #find launch with same task-id # tuto zmena
 FOUND=$(get_launch_by_task_id merge ${API_TOKEN} ${TASK_ID})
-#echo $FOUND
+echo $FOUND
 number_to_merge=$(echo $FOUND | jq '.page.totalElements' --raw-output)
+found_launch_id=$(echo $FOUND | jq '.content[0].id' --raw-output)
+found_launch_uuid=$(echo $FOUND | jq '.content[0].uuid' --raw-output)
 
 #import new launch # tuto zmena
 IMPORT=$(import_xunit merge ${API_TOKEN} ${ZIP_FILE} | jq '.message' --raw-output | cut -d' ' -f5)
-#echo $IMPORT
+echo $IMPORT
 
 #merge launches
 if [ $number_to_merge != 0 ]
 then
+  #echo "hladam running item--------------------"
+  RUNNING_ITEM=$(get_item_by_filter merge ${API_TOKEN} ${TASK_ID} ${TEST_PLAN_NAME} ${found_launch_id})
+  echo $RUNNING_ITEM
+  number_of_items=$(echo $RUNNING_ITEM | jq '.page.totalElements' --raw-output)
+  #echo "nasiel som running item--------------------"
+
+  if [ $number_of_items != 0 ]
+  then
+    #echo "hladam running item id--------------------"
+    item_id=$(echo $RUNNING_ITEM | jq '.content[0].id' --raw-output)
+    #echo $item_id
+    #echo "hladam running item uuid--------------------"
+    item_uuid=$(get_item_uuid merge ${API_TOKEN} ${item_id} | jq '.[0].uuid' --raw-output)
+    #echo $item_uuid
+    #echo "idem vymazavat-----------------------"
+    result=$(stop_delete_item merge ${API_TOKEN} ${found_launch_uuid} ${item_id} ${item_uuid})
+    #echo "vymazal som----------------------------"
+  fi
+
   # tuto zmena
   IMPORTED=$(get_launch_by_uuid merge ${API_TOKEN} ${IMPORT} | jq '.content' --raw-output)
-  #echo $IMPORTED
+  echo $IMPORTED
   #merge_string='{"launches":[76,77,78],"mergeType":"BASIC","name":"merge","description":"","endTime":1609228254450,"startTime":1609228244313,"attributes":[{"key":"scratch-build","value":"false"}],"extendSuitesDescription":false}'
   FOUND=$(echo $FOUND | jq '.content' --raw-output)
   merge_string=$(python3 merge_launches.py "$FOUND" "$IMPORTED")
@@ -200,5 +265,5 @@ then
   echo $MERGED
 fi
 
-rm $ZIP_FILE
+#rm $ZIP_FILE
 
