@@ -32,29 +32,19 @@ number_to_merge=$(echo $FOUND | jq '.page.totalElements' --raw-output)
 found_launch_id=$(echo $FOUND | jq '.content[0].id' --raw-output)
 found_launch_uuid=$(echo $FOUND | jq '.content[0].uuid' --raw-output)
 
-#creating new launch
-created_launch_uuid=$(create_new_launch ${PROJECT} ${API_TOKEN} ${ZIP_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER} | jq -r .id)
-
-#stopping created launch
-stopped_launch=$(stop_launch ${PROJECT} ${API_TOKEN} ${created_launch_uuid})
-
-#creating test-suite
-test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${created_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
-
 #merge launches
 if [ $number_to_merge != 0 ]
 then
-  #get data of existing launch
-  CREATED=$(get_launch_by_uuid ${PROJECT} ${API_TOKEN} ${created_launch_uuid} | jq '.content' --raw-output)
-  echo $CREATED
-  #merge_string='{"launches":[76,77,78],"mergeType":"BASIC","name":"merge","description":"","endTime":1609228254450,"startTime":1609228244313,"attributes":[{"key":"scratch-build","value":"false"}],"extendSuitesDescription":false}'
-  FOUND=$(echo $FOUND | jq '.content' --raw-output)
+  #creating test-suite
+   test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${found_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
+else
+  #creating new launch
+  created_launch_uuid=$(create_new_launch ${PROJECT} ${API_TOKEN} ${ZIP_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER} | jq -r .id)
 
-  #creating merge string for specified launches
-  merge_string=$(python3 merge_launches.py "$FOUND" "$CREATED")
+  #stopping created launch
+  stopped_launch=$(stop_launch ${PROJECT} ${API_TOKEN} ${created_launch_uuid})
 
-  #merging launches
-  MERGED=$(merge_launches ${PROJECT} ${API_TOKEN} "${merge_string}")
-  echo $MERGED
+  #creating test-suite
+  test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${created_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
 fi
 
