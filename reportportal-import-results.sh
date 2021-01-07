@@ -13,7 +13,9 @@ XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
 ERROR_SCRIPT="error.sh"
+FUNCTIONS_SCRIPT="functions.sh"
 PARSER="standardize_xunit.py"
+MERGER="merge_launches.py"
 USER="superadmin"
 # tuto zmena
 PASSWORD="erebus"
@@ -73,8 +75,10 @@ ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER
+#wget $SCRIPT_URL/$MERGER
 #wget $SCRIPT_URL/$RUNNING_SCRIPT
 #wget $SCRIPT_URL/$ERROR_SCRIPT
+#wget $SCRIPT_URL/$FUNCTIONS_SCRIPT
 chmod +x $IMPORT_SCRIPT
 chmod +x $RUNNING_SCRIPT
 chmod +x $ERROR_SCRIPT
