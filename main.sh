@@ -23,9 +23,15 @@ ISSUER=$9
 
 TMP_FILE="reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"
+REPORT_LOG="report.log"
+
+echo " topic COMPLETE - starting script for task $TASK_ID and plan $TEST_PLAN_NAME" >> $TASK_ID/$REPORT_LOG
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $TASK_ID/$REPORT_LOG
 
 # resolve correct project
 PROJECT=$(get_project ${ZIP_NAME})
+
+echo " import_script: project - $PROJECT" >> $TASK_ID/$REPORT_LOG
 
 # get data about the task from brew
 #brew taskinfo -v $TASK_ID > $TASKINFO_FILE
@@ -43,8 +49,14 @@ then
   BUILD_ID="unknown"
 fi
 
+echo " import_script: name - $ZIP_FILE" >> $TASK_ID/$REPORT_LOG
+
 # create custom Xunit for ReportPortal
 python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER > $TMP_FILE
+
+echo " import_script: created reportportal-results.xml, params: $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER" >> $TASK_ID/$REPORT_LOG
+cp $FILE $TASK_ID/$TEST_PLAN_NAME-original-res.xml
+cp $TMP_FILE $TASK_ID/$TEST_PLAN_NAME-reportportal-results.xml
 
 zip -r $ZIP_FILE $TMP_FILE
 
@@ -61,9 +73,13 @@ number_to_merge=$(echo $FOUND | jq '.page.totalElements' --raw-output)
 found_launch_id=$(echo $FOUND | jq '.content[0].id' --raw-output)
 found_launch_uuid=$(echo $FOUND | jq '.content[0].uuid' --raw-output)
 
+echo " import_script: found - $FOUND" >> $TASK_ID/$REPORT_LOG
+
 #import new launch
 IMPORT=$(import_xunit ${PROJECT} ${API_TOKEN} ${ZIP_FILE} | jq '.message' --raw-output | cut -d' ' -f5)
 echo $IMPORT
+
+echo " import_script: import - $IMPORT" >> $TASK_ID/$REPORT_LOG
 
 #merge launches
 if [ $number_to_merge != 0 ]
@@ -72,6 +88,7 @@ then
   RUNNING_ITEM=$(get_item_by_filter ${PROJECT} ${API_TOKEN} ${TASK_ID} ${TEST_PLAN_NAME} ${found_launch_id})
   echo $RUNNING_ITEM
   number_of_items=$(echo $RUNNING_ITEM | jq '.page.totalElements' --raw-output)
+  echo " import_script: running_item - $RUNNING_ITEM" >> $TASK_ID/$REPORT_LOG
 
   #deleting running item if exists
   if [ $number_of_items != 0 ]
@@ -79,20 +96,25 @@ then
     item_id=$(echo $RUNNING_ITEM | jq '.content[0].id' --raw-output)
     item_uuid=$(get_item_uuid ${PROJECT} ${API_TOKEN} ${item_id} | jq '.[0].uuid' --raw-output)
     result=$(stop_delete_item ${PROJECT} ${API_TOKEN} ${found_launch_uuid} ${item_id} ${item_uuid})
+    echo " import_script: delete_item - $result" >> $TASK_ID/$REPORT_LOG
   fi
 
   #get data of existing launch
   IMPORTED=$(get_launch_by_uuid ${PROJECT} ${API_TOKEN} ${IMPORT} | jq '.content' --raw-output)
   echo $IMPORTED
+  echo " import_script: imported - $IMPORTED" >> $TASK_ID/$REPORT_LOG
   FOUND=$(echo $FOUND | jq '.content' --raw-output)
 
   #creating merge string for specified launches
   merge_string=$(python3 merge_launches.py "$FOUND" "$IMPORTED")
+  echo " import_script: merge string - $merge_string" >> $TASK_ID/$REPORT_LOG
 
   #merging launches
   MERGED=$(merge_launches ${PROJECT} ${API_TOKEN} "${merge_string}")
   echo $MERGED
+  echo " import_script: merged - $MERGED" >> $TASK_ID/$REPORT_LOG
 fi
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $TASK_ID/$REPORT_LOG
 
 rm $ZIP_FILE
 
