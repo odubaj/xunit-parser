@@ -35,7 +35,7 @@ ruby=("aspell aspell-en compat-libtiff3 dblatex execstack exempi gdisk giflib gr
 # get project by component name
 function get_project() {
   local component=$1
-  echo "merge"
+  echo "default"
 
 #   if [[ " ${core_services_db[@]} " =~ " ${component} " ]]; then
 #     echo "core-services-db"
@@ -229,4 +229,5 @@ function stop_error_item() {
         -d '{"endTime":"'$time'","launchUuid":"'$launch_uuid'", "status": "FAILED","description":"Infrastructure Error during testing","issue":{"autoAnalyzed": false,"ignoreAnalyzer": true,"issueType":"si001"}}')
 }
 
-RP_URL="http://localhost:8080" #tuto zmena
+#RP_URL="http://localhost:8080"
+RP_URL="http://reportportal.infrastructure.testing-farm.io"

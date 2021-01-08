@@ -17,9 +17,9 @@ FUNCTIONS_SCRIPT="functions.sh"
 PARSER="standardize_xunit.py"
 MERGER="merge_launches.py"
 USER="superadmin"
-# tuto zmena
-PASSWORD="erebus"
-SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
+PASSWORD="aQsWdEfR1029"
+#PASSWORD="erebus"
+#SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON="datagrepper.json"
 UMB_URL=$1
 VERSION_PATTERN="0\.1\.[0-9]*"
@@ -73,11 +73,12 @@ type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
 TEST_PLAN_NAME=$namespace.$type."functional"
 ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 REPORT_LOG="report.log"
+#TIMESTAMP=$(cat $DATAGREPPER_JSON | jq -r .msg_id.timestamp)
 
 mkdir -p $TASK_ID
 echo " --------------------------------------------------" >> $TASK_ID/$REPORT_LOG
 echo " received message from topic $topic - message valid" >> $TASK_ID/$REPORT_LOG
- cp $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$DATAGREPPER_JSON
+mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$DATAGREPPER_JSON
 
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER

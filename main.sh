@@ -116,5 +116,5 @@ then
 fi
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $TASK_ID/$REPORT_LOG
 
-rm $ZIP_FILE
+rm $ZIP_FILE $FILE $TMP_FILE
 
