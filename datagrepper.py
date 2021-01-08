@@ -43,7 +43,7 @@ def get_messages():
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
                 print(msg['msg']['category'])
                 print(msg['msg']['ci']['email'])
-                print(msg['msg']['version'])
+                #print(msg['msg']['version'])
                 
 
                 if(msg['msg']['category'] != "functional"):

@@ -22,7 +22,7 @@ echo " running_script: project - $PROJECT" >> $TASK_ID/$REPORT_LOG
 
 if [ $SCRATCH == "true" ]
 then
-  ZIP_NAME=$ZIP_NAME-scratch.zip
+  ZIP_NAME=$ZIP_NAME-scratch
 fi
 
 echo " running_script: name - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
