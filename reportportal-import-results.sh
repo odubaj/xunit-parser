@@ -21,25 +21,25 @@ PASSWORD="aQsWdEfR1029"
 #PASSWORD="erebus"
 #SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON="datagrepper.json"
-UMB_URL=$1
+#UMB_URL=$1
 VERSION_PATTERN="0\.1\.[0-9]*"
 URL_PATTERN="http[s]*:*"
 
-curl -s $UMB_URL > $DATAGREPPER_JSON
+# curl -s $UMB_URL > $DATAGREPPER_JSON
 
-category=$(cat $DATAGREPPER_JSON | jq -r .msg.category)
-if [ $category != "functional" ] ; then
-    echo "non-functional tests"
-    rm $DATAGREPPER_JSON;
-    exit 0;
-fi
+# category=$(cat $DATAGREPPER_JSON | jq -r .msg.category)
+# if [ $category != "functional" ] ; then
+#     echo "non-functional tests"
+#     rm $DATAGREPPER_JSON;
+#     exit 0;
+# fi
 
-quality_engineering=$(cat $DATAGREPPER_JSON | jq -r .msg.ci.email)
-if [ $quality_engineering != "baseos-ci@redhat.com" ] ; then
-    echo "bad QE"
-    rm $DATAGREPPER_JSON;
-    exit 0;
-fi
+# quality_engineering=$(cat $DATAGREPPER_JSON | jq -r .msg.ci.email)
+# if [ $quality_engineering != "baseos-ci@redhat.com" ] ; then
+#     echo "bad QE"
+#     rm $DATAGREPPER_JSON;
+#     exit 0;
+# fi
 
 xunit_version=$(cat $DATAGREPPER_JSON | jq -r .msg.version)
 if [ -z $xunit_version ] || [[ ! $xunit_version =~ $VERSION_PATTERN ]]; then
