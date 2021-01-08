@@ -116,6 +116,9 @@ def add_non_existing_arch_element(output_xml, arch_name, props):
 def process_testcase_properties(testcase):
     """Processes testcase properties of TestingFarm XUnit"""
     dictionary = {}
+    dictionary['host'] = "unknown"
+    dictionary['polarion_id'] = "unknown"
+    dictionary['test-src-code'] = "unknown"
     for testcase_property in testcase.properties.property:
         if(testcase_property.attrib["name"] == "baseosci.host"):
             dictionary['host'] = testcase_property.attrib["value"]
@@ -134,9 +137,11 @@ def process_testcase_package_environment(testcase):
     """Processes testcase packages and testing environments of TestingFarm XUnit"""
     dictionary = {}
     packages = []
-    for testcase_test_env in testcase["testing-environment"]:
-        for testcase_test_env_prop in testcase_test_env.property:
-            dictionary[testcase_test_env.attrib["name"]+"-"+testcase_test_env_prop.attrib["name"]] = testcase_test_env_prop.attrib["value"]
+    existing_element = testcase.find('.//testing-environment')
+    if(existing_element != None):
+        for testcase_test_env in testcase["testing-environment"]:
+            for testcase_test_env_prop in testcase_test_env.property:
+                dictionary[testcase_test_env.attrib["name"]+"-"+testcase_test_env_prop.attrib["name"]] = testcase_test_env_prop.attrib["value"]
 
     existing_element = testcase.find('.//package')
     if(existing_element != None):
@@ -295,6 +300,9 @@ def main(args):
             for testcase in testsuite.testcase:
                 testcase_props = process_testcase_properties(testcase)
                 testcase_package_environment = process_testcase_package_environment(testcase)
+                if(not testcase_package_environment[0]):
+                    testcase_package_environment[0]['provisioned-compose'] = "unknown"
+                    testcase_package_environment[0]['provisioned-arch'] = "unknown"
                 compose_testsuite = add_non_existing_compose_element(output_xml, testcase_package_environment[0]['provisioned-compose'], global_props_dict)
                 testcase_testsuite = add_non_existing_testcase_element(compose_testsuite, testcase.attrib["name"], (testcase_props['polarion_id'],), testcase_props['test-src-code'])
                 arch_testsuite = add_non_existing_arch_element(testcase_testsuite, testcase_package_environment[0]['provisioned-arch'], (testcase_props['host'],) + testcase_package_environment)
