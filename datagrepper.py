@@ -3,6 +3,7 @@ import json
 import sys
 import requests
 import time
+import os
 
 DATAGREPPER_JSON="datagrepper.json"
 
