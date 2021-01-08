@@ -78,7 +78,7 @@ REPORT_LOG="report.log"
 mkdir -p $TASK_ID
 echo " --------------------------------------------------" >> $TASK_ID/$REPORT_LOG
 echo " received message from topic $topic - message valid" >> $TASK_ID/$REPORT_LOG
-mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$DATAGREPPER_JSON
+mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$topic-$DATAGREPPER_JSON
 
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER
