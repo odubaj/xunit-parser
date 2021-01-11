@@ -73,12 +73,13 @@ type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
 TEST_PLAN_NAME=$namespace.$type."functional"
 ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 REPORT_LOG="report.log"
+topic_name=$(echo $topic | cut -d'.' -f6)
 #TIMESTAMP=$(cat $DATAGREPPER_JSON | jq -r .msg_id.timestamp)
 
 mkdir -p $TASK_ID
 echo " --------------------------------------------------" >> $TASK_ID/$REPORT_LOG
 echo " received message from topic $topic - message valid" >> $TASK_ID/$REPORT_LOG
-mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$topic-$DATAGREPPER_JSON
+mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$topic_name-$DATAGREPPER_JSON
 
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER
