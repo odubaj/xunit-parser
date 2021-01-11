@@ -62,6 +62,10 @@ if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
     else
         python3 -c "import zlib,base64; print(zlib.decompress(base64.b64decode('$HASH')).decode('utf-8') )" > $XUNIT_ORIGINAL
     fi
+elif [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.error" ] ; then
+    LOG1=$(cat $DATAGREPPER_JSON | jq -r .msg.run.debug)
+    LOG2=$(cat $DATAGREPPER_JSON | jq -r .msg.run.log)
+    LOG3=$(cat $DATAGREPPER_JSON | jq -r .msg.run.log_raw)
 fi
 
 COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.component)
@@ -96,6 +100,6 @@ if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
 elif [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.running" ] ; then
     ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
 else
-    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $TASK_ID $TEST_PLAN_NAME
+    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $TASK_ID $TEST_PLAN_NAME $LOG1 $LOG2 $LOG3
 fi
 

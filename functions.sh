@@ -229,5 +229,19 @@ function stop_error_item() {
         -d '{"endTime":"'$time'","launchUuid":"'$launch_uuid'", "status": "FAILED","description":"Infrastructure Error during testing","issue":{"autoAnalyzed": false,"ignoreAnalyzer": true,"issueType":"si001"}}')
 }
 
+# import logs before ending with error
+function logs_error_item() {
+  local project=$1
+  local api_token=$2
+  local launch_uuid=$3
+  local item_uuid=$4
+  local log=$5
+  local time=$(echo $(($(date +%s%N)/1000000)))
+
+  echo $(curl -X POST "${RP_URL}/api/v1/${project}/log" -H  "accept: */*" -H  "Content-Type: application/json" \
+        -H "Authorization: Bearer $api_token" \
+        -d '{"time":"'$time'","launchUuid":"'$launch_uuid'","itemUuid":"'$item_uuid'","level": 40000,"message": "'$log'"}')
+}
+
 #RP_URL="http://localhost:8080"
 RP_URL="http://reportportal.infrastructure.testing-farm.io"
