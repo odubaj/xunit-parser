@@ -53,11 +53,11 @@ echo " import_script: component - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
 echo " import_script: launch name - $ZIP_FILE" >> $TASK_ID/$REPORT_LOG
 
 # create custom Xunit for ReportPortal
-python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER > $TMP_FILE
+python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER $ZIP_NAME > $TMP_FILE
 
 #skontroluj ci tmp file neni prazdna
 
-echo " import_script: created reportportal-results.xml, params: $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER" >> $TASK_ID/$REPORT_LOG
+echo " import_script: created reportportal-results.xml, params: $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
 cp $FILE $TASK_ID/$TEST_PLAN_NAME-original-res.xml
 cp $TMP_FILE $TASK_ID/$TEST_PLAN_NAME-reportportal-results.xml
 
