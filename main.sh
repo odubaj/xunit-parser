@@ -41,7 +41,7 @@ ZIP_FILE=$NVR.zip
 
 if [ $SCRATCH == "true" ]
 then
-  ZIP_FILE=$NVR(s).zip
+  ZIP_FILE=$NVR\(s\).zip
 fi
 
 if [ -z $BUILD_ID ]

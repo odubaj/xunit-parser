@@ -24,7 +24,7 @@ LAUNCH_NAME=$NVR
 
 if [ $SCRATCH == "true" ]
 then
-  LAUNCH_NAME=$NVR(s)
+  LAUNCH_NAME=$NVR\(s\)
 fi
 
 echo " running_script: component - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
