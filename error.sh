@@ -23,10 +23,10 @@ echo " err_script: project - $PROJECT" >> $TASK_ID/$REPORT_LOG
 
 if [ $SCRATCH == "true" ]
 then
-  ZIP_NAME=$ZIP_NAME-scratch
+  ZIP_NAME=$ZIP_NAME(s)
 fi
 
-echo " err_script: name - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
+echo " err_script: component - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
 
 # import data with appropriate tokens
 UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})

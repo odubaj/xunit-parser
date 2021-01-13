@@ -178,11 +178,12 @@ function create_new_launch() {
   local nvr=$5
   local task_id=$6
   local issuer=$7
+  local component=$8
   local time=$(echo $(($(date +%s%N)/1000000)))
 
   echo $(curl -X POST "${RP_URL}/api/v1/${project}/launch" -H  "accept: */*" -H  "Content-Type: application/json" \
         -H "Authorization: Bearer $api_token" \
-        -d '{"name":"'$name'","description":"","startTime":"'$time'","mode":"DEFAULT","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"nvr","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}]}')
+        -d '{"name":"'$name'","description":"","startTime":"'$time'","mode":"DEFAULT","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"component","value":"'$component'"},{"key":"nvr","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}]}')
 }
 
 #stopping created launch

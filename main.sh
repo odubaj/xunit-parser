@@ -37,11 +37,11 @@ echo " import_script: project - $PROJECT" >> $TASK_ID/$REPORT_LOG
 #brew taskinfo -v $TASK_ID > $TASKINFO_FILE
 BUILD_ID="unknown" #$(grep "Build: " $TASKINFO_FILE | cut -d' ' -f3 | tr -d '()')
 
-ZIP_FILE=$ZIP_NAME.zip
+ZIP_FILE=$NVR.zip
 
 if [ $SCRATCH == "true" ]
 then
-  ZIP_FILE=$ZIP_NAME-scratch.zip
+  ZIP_FILE=$NVR(s).zip
 fi
 
 if [ -z $BUILD_ID ]
@@ -49,10 +49,13 @@ then
   BUILD_ID="unknown"
 fi
 
-echo " import_script: name - $ZIP_FILE" >> $TASK_ID/$REPORT_LOG
+echo " import_script: component - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
+echo " import_script: launch name - $ZIP_FILE" >> $TASK_ID/$REPORT_LOG
 
 # create custom Xunit for ReportPortal
 python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER > $TMP_FILE
+
+#skontroluj ci tmp file neni prazdna
 
 echo " import_script: created reportportal-results.xml, params: $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER" >> $TASK_ID/$REPORT_LOG
 cp $FILE $TASK_ID/$TEST_PLAN_NAME-original-res.xml

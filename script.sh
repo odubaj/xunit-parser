@@ -20,12 +20,15 @@ PROJECT=$(get_project ${ZIP_NAME})
 
 echo " running_script: project - $PROJECT" >> $TASK_ID/$REPORT_LOG
 
+LAUNCH_NAME=$NVR
+
 if [ $SCRATCH == "true" ]
 then
-  ZIP_NAME=$ZIP_NAME-scratch
+  LAUNCH_NAME=$NVR(s)
 fi
 
-echo " running_script: name - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
+echo " running_script: component - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
+echo " running_script: launch name - $LAUNCH_NAME" >> $TASK_ID/$REPORT_LOG
 
 # import data with appropriate tokens
 UI_TOKEN=$(get_ui_token ${USERNAME} ${PASSWORD})
@@ -46,11 +49,11 @@ echo " running_script: found - $FOUND" >> $TASK_ID/$REPORT_LOG
 if [ $number_to_merge != 0 ]
 then
   #creating test-suite
-   test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${found_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
-   echo " running_script: created test_suite - $test_suite" >> $TASK_ID/$REPORT_LOG
+  test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${found_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
+  echo " running_script: created test_suite - $test_suite" >> $TASK_ID/$REPORT_LOG
 else
   #creating new launch
-  created_launch_uuid=$(create_new_launch ${PROJECT} ${API_TOKEN} ${ZIP_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER} | jq -r .id)
+  created_launch_uuid=$(create_new_launch ${PROJECT} ${API_TOKEN} ${LAUNCH_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER} ${ZIP_NAME} | jq -r .id)
   echo " running_script: created launch - $created_launch_uuid" >> $TASK_ID/$REPORT_LOG
 
   #stopping created launch
