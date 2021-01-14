@@ -41,18 +41,28 @@ def get_messages():
                 print("sprava!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
                 print (json.dumps(msg))
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
-                print(msg['msg']['category'])
-                print(msg['msg']['ci']['email'])
-                #print(msg['msg']['version'])
-                
 
-                if(('category' in msg['msg']) and (msg['msg']['category'] != "functional")):
-                    print("nefunkcionalne")
+                if('category' not in msg['msg']):
+                    print("category neexistuje")
                     continue
+                else:
+                    if (msg['msg']['category'] != "functional"):
+                        print(msg['msg']['category'])
+                        print("nefunkcionalne")
+                        continue
 
-                if(('ci' in msg['msg']) and (msg['msg']['ci']['email'] != "baseos-ci@redhat.com")):
-                    print("zly mail")
+                if('ci' not in msg['msg']):
+                    print("ci neexistuje")
                     continue
+                else:
+                    if('email' not in msg['msg']['ci']):
+                        print("email neexistuje")
+                        continue
+                    else:
+                        if (msg['msg']['ci']['email'] != "baseos-ci@redhat.com"):
+                            print("zly mail")
+                            print(msg['msg']['ci']['email'])
+                            continue
 
                 text_file = open(DATAGREPPER_JSON, "w")
                 text_file.write(json.dumps(msg))
