@@ -46,11 +46,11 @@ def get_messages():
                 #print(msg['msg']['version'])
                 
 
-                if(msg['msg']['category'] != "functional"):
+                if(('category' in msg['msg']) and (msg['msg']['category'] != "functional")):
                     print("nefunkcionalne")
                     continue
 
-                if(msg['msg']['ci']['email'] != "baseos-ci@redhat.com"):
+                if(('ci' in msg['msg']) and (msg['msg']['ci']['email'] != "baseos-ci@redhat.com")):
                     print("zly mail")
                     continue
 
