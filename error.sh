@@ -23,7 +23,7 @@ echo " err_script: project - $PROJECT" >> $TASK_ID/$REPORT_LOG
 
 if [ $SCRATCH == "true" ]
 then
-  ZIP_NAME=$ZIP_NAME\(s\)
+  ZIP_NAME=$ZIP_NAME\(scratch\)
 fi
 
 echo " err_script: component - $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
