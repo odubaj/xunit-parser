@@ -13,16 +13,16 @@ XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
 ERROR_SCRIPT="error.sh"
-FUNCTIONS_SCRIPT="functions.sh"
-PARSER="standardize_xunit.py"
-MERGER="merge_launches.py"
+#FUNCTIONS_SCRIPT="functions.sh"
+#PARSER="standardize_xunit.py"
+#MERGER="merge_launches.py"
 USER="superadmin"
 PASSWORD="aQsWdEfR1029"
 #PASSWORD="erebus"
 #SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON="datagrepper.json"
 #UMB_URL=$1
-VERSION_PATTERN="0\.1\.[0-9]*"
+#VERSION_PATTERN="0\.1\.[0-9]*"
 URL_PATTERN="http[s]*:*"
 
 # curl -s $UMB_URL > $DATAGREPPER_JSON
@@ -41,12 +41,12 @@ URL_PATTERN="http[s]*:*"
 #     exit 0;
 # fi
 
-xunit_version=$(cat $DATAGREPPER_JSON | jq -r .msg.version)
-if [ -z $xunit_version ] || [[ ! $xunit_version =~ $VERSION_PATTERN ]]; then
-    echo "bad version"
-    rm $DATAGREPPER_JSON;
-    exit 0;
-fi
+# xunit_version=$(cat $DATAGREPPER_JSON | jq -r .msg.version)
+# if [ -z $xunit_version ] || [[ ! $xunit_version =~ $VERSION_PATTERN ]]; then
+#     echo "bad version"
+#     rm $DATAGREPPER_JSON;
+#     exit 0;
+# fi
 
 topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
 if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then

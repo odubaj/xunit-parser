@@ -194,7 +194,7 @@ def add_additional_tag(testphase, result):
     """Creates additional tags of testcase result statuses for ReportPortal XUnit"""
     if result in ('failed', 'fail'):
         add_failure(testphase)
-    elif result in ('error', 'errored'):
+    elif result in ('error', 'errored', 'none'):
         add_error(testphase)
     elif result in ('skipped', 'skip'):
         add_skipped(testphase)
@@ -264,9 +264,13 @@ def add_test_phases(testcase, arch_testsuite):
     else:
         result_element = testcase.find('properties/property[@{}="{}"]'.format("name", "baseosci.result"))
         testphase = etree.SubElement(arch_testsuite, "testcase", name="Test")
+        add_logs(testcase, testphase)
         if(result_element != None):
             add_additional_tag(testphase, result_element.attrib["value"].lower())
             arch_testsuite.set("result", result_element.attrib["value"])
+        else:
+            add_additional_tag(testphase, testcase.attrib["result"].lower())
+            arch_testsuite.set("result", testcase.attrib["result"])
 
 # def add_time(arch_testsuite, time):
 #     arch_testsuite.set("time", time)
@@ -312,7 +316,9 @@ def main(args):
                 arch_testsuite = add_non_existing_arch_element(testcase_testsuite, testcase_package_environment[0]['provisioned-arch'], (testcase_props['host'],) + testcase_package_environment)
                 # if('time' in testcase.attrib):
                 #     add_time(arch_testsuite, testcase.attrib["time"])
-                add_logs(testcase, arch_testsuite)
+                existing_element = testcase.find('phases/phase')
+                if(existing_element != None):
+                    add_logs(testcase, arch_testsuite)
                 add_test_phases(testcase, arch_testsuite)
     
     for compose_testsuite in output_xml:
