@@ -192,7 +192,7 @@ def add_manual(testphase):
 
 def add_additional_tag(testphase, result):
     """Creates additional tags of testcase result statuses for ReportPortal XUnit"""
-    if result in ('failed', 'fail'):
+    if result in ('failed', 'fail', 'warn'):
         add_failure(testphase)
     elif result in ('error', 'errored', 'none'):
         add_error(testphase)
