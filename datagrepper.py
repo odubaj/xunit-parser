@@ -89,11 +89,11 @@ def get_messages():
                         print("zla version")
                         continue
 
-                ret = os.system("mkdir -p "+msg['msg']['id'])
+                ret = os.system("mkdir -p "+msg['msg']['artifact']['id'])
                 topic_name = msg['topic'].split('.')[5]
                 mytime = round(time.time() * 1000)
 
-                DATAGREPPER_JSON = msg['msg']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+mytime+"-"+topic_name+"-datagrepper.json"
+                DATAGREPPER_JSON = msg['msg']['artifact']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+mytime+"-"+topic_name+"-datagrepper.json"
 
                 text_file = open(DATAGREPPER_JSON, "w")
                 text_file.write(json.dumps(msg))
@@ -101,10 +101,10 @@ def get_messages():
                 text_file.close()
 
                 if("redhat-module" not in msg['topic']):
-                    ret = os.system("sh reportportal-import-results.sh "+DATAGREPPER_JSON)
+                    ret = os.system("sh reportportal-import-results.sh "+DATAGREPPER_JSON+" &")
                     print("skript pre brew-buildy spusteny")
                 else:
-                    ret = os.system("sh reportportal-import-module-results.sh "+DATAGREPPER_JSON)
+                    ret = os.system("sh reportportal-import-module-results.sh "+DATAGREPPER_JSON+" &")
                     print("skript pre module-buildy spusteny")
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
 
