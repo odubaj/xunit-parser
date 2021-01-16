@@ -292,7 +292,11 @@ def main(args):
 
     global_props_dict = {}
     global_props_dict["name"] = args.data[0]
-    global_props_dict["nvr"] = args.data[1]
+    if ("redhat-module" in args.data[0]):
+        global_props_dict["nsvc"] = args.data[1]
+        global_props_dict["module"] = "redhat-module"
+    else:
+        global_props_dict["nvr"] = args.data[1]
     global_props_dict["build-id"] = args.data[2]
     global_props_dict["task-id"] = args.data[3]
     global_props_dict["scratch-build"] = args.data[4]
