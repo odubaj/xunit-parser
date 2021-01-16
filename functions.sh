@@ -179,11 +179,19 @@ function create_new_launch() {
   local task_id=$6
   local issuer=$7
   local component=$8
+  local suite_name=$9
   local time=$(echo $(($(date +%s%N)/1000000)))
+  if [[ $suite_name == *"redhat-module"* ]]; then
+    nvr_name="nsvc"
+    add_module=',{"key":"module","value":"redhat-module"}'
+  else
+    nvr_name="nvr"
+    add_module=""
+  fi
 
   echo $(curl -X POST "${RP_URL}/api/v1/${project}/launch" -H  "accept: */*" -H  "Content-Type: application/json" \
         -H "Authorization: Bearer $api_token" \
-        -d '{"name":"'$name'","description":"","startTime":"'$time'","mode":"DEFAULT","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"component","value":"'$component'"},{"key":"nvr","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}]}')
+        -d '{"name":"'$name'","description":"","startTime":"'$time'","mode":"DEFAULT","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"component","value":"'$component'"},{"key":"'$nvr_name'","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}'$add_module']}')
 }
 
 #stopping created launch
@@ -210,10 +218,17 @@ function create_test_suite() {
   local task_id=$7
   local issuer=$8
   local time=$(echo $(($(date +%s%N)/1000000)))
+  if [[ $name == *"redhat-module"* ]]; then
+    nvr_name="nsvc"
+    add_module=',{"key":"module","value":"redhat-module"}'
+  else
+    nvr_name="nvr"
+    add_module=""
+  fi
 
   echo $(curl -X POST "${RP_URL}/api/v1/${project}/item" -H  "accept: */*" -H  "Content-Type: application/json" \
         -H "Authorization: Bearer $api_token" \
-        -d '{"name":"'$name'","startTime":"'$time'","type":"suite","launchUuid":"'$launch_uuid'","description":"","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"nvr","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}]}')
+        -d '{"name":"'$name'","startTime":"'$time'","type":"suite","launchUuid":"'$launch_uuid'","description":"","attributes":[{"key":"task-id","value":"'$task_id'"},{"key":"scratch","value":"'$scratch'"},{"key":"'$nvr_name'","value":"'$nvr'"},{"key":"issuer","value":"'$issuer'"}'$add_module']}')
 }
 
 # stop running item with error

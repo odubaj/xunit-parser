@@ -97,7 +97,7 @@ then
   fi
 else
   #creating new launch
-  created_launch_uuid=$(create_new_launch ${PROJECT} ${API_TOKEN} ${LAUNCH_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER} ${ZIP_NAME} | jq -r .id)
+  created_launch_uuid=$(create_new_launch ${PROJECT} ${API_TOKEN} ${LAUNCH_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER} ${ZIP_NAME} ${TEST_PLAN_NAME} | jq -r .id)
   echo " error_script: created launch - $created_launch_uuid" >> $TASK_ID/$REPORT_LOG
 
   #stopping created launch
