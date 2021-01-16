@@ -1,14 +1,20 @@
 #!/bin/bash
 
-XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
 ERROR_SCRIPT="error.sh"
 USER="superadmin"
 PASSWORD="aQsWdEfR1029"
 #PASSWORD="erebus"
-DATAGREPPER_JSON="datagrepper.json"
+DATAGREPPER_JSON=$1
 URL_PATTERN="http[s]*:*"
+
+TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
+namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
+type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
+TEST_PLAN_NAME=$namespace.$type."functional"
+time=$(echo $(($(date +%s%N)/1000000)))
+XUNIT_ORIGINAL="$TASK_ID/$TEST_PLAN_NAME-$time-original-res.xml"
 
 topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
 if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
@@ -33,18 +39,11 @@ fi
 COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.name)
 SCRATCH="false" #$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
 NVR=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.nsvc)
-TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
-namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
-type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
-TEST_PLAN_NAME=$namespace.$type."functional"
 ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 REPORT_LOG="report.log"
-topic_name=$(echo $topic | cut -d'.' -f6)
 
-mkdir -p $TASK_ID
 echo " --------------------------------------------------" >> $TASK_ID/$REPORT_LOG
 echo " received message from topic $topic - message valid" >> $TASK_ID/$REPORT_LOG
-mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$topic_name-$DATAGREPPER_JSON
 
 chmod +x $IMPORT_SCRIPT
 chmod +x $RUNNING_SCRIPT

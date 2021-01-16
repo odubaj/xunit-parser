@@ -9,7 +9,6 @@
 
 # musia mat tag 0.1.*
 
-XUNIT_ORIGINAL="results.xml"
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
 ERROR_SCRIPT="error.sh"
@@ -20,12 +19,10 @@ USER="superadmin"
 PASSWORD="aQsWdEfR1029"
 #PASSWORD="erebus"
 #SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
-DATAGREPPER_JSON="datagrepper.json"
+DATAGREPPER_JSON=$1
 #UMB_URL=$1
 #VERSION_PATTERN="0\.1\.[0-9]*"
 URL_PATTERN="http[s]*:*"
-
-# curl -s $UMB_URL > $DATAGREPPER_JSON
 
 # category=$(cat $DATAGREPPER_JSON | jq -r .msg.category)
 # if [ $category != "functional" ] ; then
@@ -47,6 +44,13 @@ URL_PATTERN="http[s]*:*"
 #     rm $DATAGREPPER_JSON;
 #     exit 0;
 # fi
+
+TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
+namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
+type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
+TEST_PLAN_NAME=$namespace.$type."functional"
+time=$(echo $(($(date +%s%N)/1000000)))
+XUNIT_ORIGINAL="$TASK_ID/$TEST_PLAN_NAME-$time-original-res.xml"
 
 topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
 if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
@@ -71,19 +75,11 @@ fi
 COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.component)
 SCRATCH=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
 NVR=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.nvr)
-TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
-namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
-type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
-TEST_PLAN_NAME=$namespace.$type."functional"
 ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 REPORT_LOG="report.log"
-topic_name=$(echo $topic | cut -d'.' -f6)
-#TIMESTAMP=$(cat $DATAGREPPER_JSON | jq -r .msg_id.timestamp)
 
-mkdir -p $TASK_ID
 echo " --------------------------------------------------" >> $TASK_ID/$REPORT_LOG
 echo " received message from topic $topic - message valid" >> $TASK_ID/$REPORT_LOG
-mv $DATAGREPPER_JSON $TASK_ID/$TEST_PLAN_NAME-$topic_name-$DATAGREPPER_JSON
 
 #wget $SCRIPT_URL/$IMPORT_SCRIPT
 #wget $SCRIPT_URL/$PARSER

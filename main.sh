@@ -21,7 +21,9 @@ TASK_ID=$7
 TEST_PLAN_NAME=$8
 ISSUER=$9
 
-TMP_FILE="reportportal-results.xml"
+time=$(echo $(($(date +%s%N)/1000000)))
+
+TMP_FILE="$TASK_ID/$TEST_PLAN_NAME-$time-reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"
 REPORT_LOG="report.log"
 
@@ -55,11 +57,9 @@ echo " import_script: launch name - $ZIP_FILE" >> $TASK_ID/$REPORT_LOG
 # create custom Xunit for ReportPortal
 python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER $ZIP_NAME > $TMP_FILE
 
-#skontroluj ci tmp file neni prazdna
-
 echo " import_script: created reportportal-results.xml, params: $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
-cp $FILE $TASK_ID/$TEST_PLAN_NAME-original-res.xml
-cp $TMP_FILE $TASK_ID/$TEST_PLAN_NAME-reportportal-results.xml
+#cp $FILE $TASK_ID/$TEST_PLAN_NAME-original-res.xml
+#cp $TMP_FILE $TASK_ID/$TEST_PLAN_NAME-reportportal-results.xml
 
 zip -r $ZIP_FILE $TMP_FILE
 
@@ -119,5 +119,5 @@ then
 fi
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $TASK_ID/$REPORT_LOG
 
-rm $ZIP_FILE $FILE $TMP_FILE
+rm $ZIP_FILE
 
