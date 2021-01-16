@@ -93,7 +93,7 @@ def get_messages():
                 topic_name = msg['topic'].split('.')[5]
                 mytime = round(time.time() * 1000)
 
-                DATAGREPPER_JSON = msg['msg']['artifact']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+mytime+"-"+topic_name+"-datagrepper.json"
+                DATAGREPPER_JSON = msg['msg']['artifact']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+str(mytime)+"-"+topic_name+"-datagrepper.json"
 
                 text_file = open(DATAGREPPER_JSON, "w")
                 text_file.write(json.dumps(msg))
