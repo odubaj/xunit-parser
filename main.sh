@@ -21,7 +21,7 @@ TASK_ID=$7
 TEST_PLAN_NAME=$8
 ISSUER=$9
 
-time=$(echo $(($(date +%s%N)/1000000)))
+time=${10}
 
 TMP_FILE="$TASK_ID/$TEST_PLAN_NAME-$time-reportportal-results.xml"
 TASKINFO_FILE="taskinfo.txt"

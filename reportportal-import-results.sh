@@ -49,7 +49,7 @@ TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
 namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
 type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
 TEST_PLAN_NAME=$namespace.$type."functional"
-time=$(echo $(($(date +%s%N)/1000000)))
+time=$2
 XUNIT_ORIGINAL="$TASK_ID/$TEST_PLAN_NAME-$time-original-res.xml"
 
 topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
@@ -92,7 +92,7 @@ chmod +x $RUNNING_SCRIPT
 chmod +x $ERROR_SCRIPT
 
 if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
-    ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
+    ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER $time
 elif [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.running" ] ; then
     ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
 else

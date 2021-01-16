@@ -101,10 +101,10 @@ def get_messages():
                 text_file.close()
 
                 if("redhat-module" not in msg['topic']):
-                    ret = os.system("sh reportportal-import-results.sh "+DATAGREPPER_JSON+" &")
+                    ret = os.system("sh reportportal-import-results.sh "+DATAGREPPER_JSON+" "+str(mytime)+" &")
                     print("skript pre brew-buildy spusteny")
                 else:
-                    ret = os.system("sh reportportal-import-module-results.sh "+DATAGREPPER_JSON+" &")
+                    ret = os.system("sh reportportal-import-module-results.sh "+DATAGREPPER_JSON+" "+str(mytime)+" &")
                     print("skript pre module-buildy spusteny")
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
 
