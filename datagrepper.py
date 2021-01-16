@@ -91,9 +91,9 @@ def get_messages():
 
                 ret = os.system("mkdir -p "+msg['msg']['id'])
                 topic_name = msg['topic'].split('.')[5]
-                time = round(time.time() * 1000)
+                mytime = round(time.time() * 1000)
 
-                DATAGREPPER_JSON = msg['msg']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+time+"-"+topic_name+"-datagrepper.json"
+                DATAGREPPER_JSON = msg['msg']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+mytime+"-"+topic_name+"-datagrepper.json"
 
                 text_file = open(DATAGREPPER_JSON, "w")
                 text_file.write(json.dumps(msg))
