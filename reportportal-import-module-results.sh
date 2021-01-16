@@ -37,7 +37,7 @@ elif [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.error" ] ; then
 fi
 
 COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.name)
-SCRATCH="false" #$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
+SCRATCH="unknown" #$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
 NVR=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.nsvc)
 ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 REPORT_LOG="report.log"
@@ -54,6 +54,6 @@ if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
 elif [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.running" ] ; then
     ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
 else
-    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $TASK_ID $TEST_PLAN_NAME $LOG1 $LOG2 $LOG3
+    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER $LOG1 $LOG2 $LOG3
 fi
 

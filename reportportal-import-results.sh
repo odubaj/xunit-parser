@@ -96,6 +96,6 @@ if [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.complete" ] ; then
 elif [ $topic == "/topic/VirtualTopic.eng.ci.brew-build.test.running" ] ; then
     ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
 else
-    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $TASK_ID $TEST_PLAN_NAME $LOG1 $LOG2 $LOG3
+    ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER $LOG1 $LOG2 $LOG3
 fi
 

@@ -39,14 +39,14 @@ echo $API_TOKEN
 #find launch with same task-id
 FOUND=$(get_launch_by_task_id ${PROJECT} ${API_TOKEN} ${TASK_ID})
 echo $FOUND
-number_to_merge=$(echo $FOUND | jq '.page.totalElements' --raw-output)
+number_of_found=$(echo $FOUND | jq '.page.totalElements' --raw-output)
 found_launch_id=$(echo $FOUND | jq '.content[0].id' --raw-output)
 found_launch_uuid=$(echo $FOUND | jq '.content[0].uuid' --raw-output)
 
 echo " running_script: found - $FOUND" >> $TASK_ID/$REPORT_LOG
 
-#merge launches
-if [ $number_to_merge != 0 ]
+#found_launches
+if [ $number_of_found != 0 ]
 then
   #creating test-suite
   test_suite=$(create_test_suite ${PROJECT} ${API_TOKEN} ${found_launch_uuid} ${TEST_PLAN_NAME} ${SCRATCH} ${NVR} ${TASK_ID} ${ISSUER})
