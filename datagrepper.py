@@ -57,6 +57,9 @@ def get_messages():
                 print (json.dumps(msg))
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
 
+                ret = os.system("echo '--------------------------------------------------' >> actions.log")
+                ret = os.system("echo 'received msg with task-id "+msg['msg']['artifact']['id']+"' >> actions.log")
+
                 if('category' not in msg['msg']):
                     print("category neexistuje")
                     continue
@@ -95,6 +98,8 @@ def get_messages():
 
                 DATAGREPPER_JSON = msg['msg']['artifact']['id']+"/"+msg['msg']['namespace']+"."+msg['msg']['type']+".functional"+"-"+str(mytime)+"-"+topic_name+"-datagrepper.json"
 
+                ret = os.system("echo 'msg valid, topic: "+topic_name+", plan: "+msg['msg']['namespace']+"."+msg['msg']['type']+".functional' >> actions.log")
+
                 text_file = open(DATAGREPPER_JSON, "w")
                 text_file.write(json.dumps(msg))
                 print("subor vytvoreny")
@@ -102,11 +107,14 @@ def get_messages():
 
                 if("redhat-module" not in msg['topic']):
                     ret = os.system("sh reportportal-import-results.sh "+DATAGREPPER_JSON+" "+str(mytime)+" &")
+                    ret = os.system("echo 'starting brew-build script' >> actions.log")
                     print("skript pre brew-buildy spusteny")
                 else:
                     ret = os.system("sh reportportal-import-module-results.sh "+DATAGREPPER_JSON+" "+str(mytime)+" &")
+                    ret = os.system("echo 'starting module-build script' >> actions.log")
                     print("skript pre module-buildy spusteny")
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
+                ret = os.system("echo '--------------------------------------------------' >> actions.log")
 
         time.sleep(10)
 
