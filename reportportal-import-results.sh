@@ -1,49 +1,16 @@
 #!/bin/bash
 
-# Script which downloads import and parser scripts, executes them and creates
-# new XUnit reportportal-results.xml
-
-# topicy z ktorych budem tahat:
-# redhat-module.test.complete
-# brew-build.test.complete
-
-# musia mat tag 0.1.*
+# Script checks corret format of UMB message
+# and executes approriate script for brew-builds
 
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
 ERROR_SCRIPT="error.sh"
-#FUNCTIONS_SCRIPT="functions.sh"
-#PARSER="standardize_xunit.py"
-#MERGER="merge_launches.py"
 USER="superadmin"
 PASSWORD="aQsWdEfR1029"
 #PASSWORD="erebus"
-#SCRIPT_URL="https://raw.githubusercontent.com/odubaj/xunit-parser/master"
 DATAGREPPER_JSON=$1
-#UMB_URL=$1
-#VERSION_PATTERN="0\.1\.[0-9]*"
 URL_PATTERN="http[s]*:*"
-
-# category=$(cat $DATAGREPPER_JSON | jq -r .msg.category)
-# if [ $category != "functional" ] ; then
-#     echo "non-functional tests"
-#     rm $DATAGREPPER_JSON;
-#     exit 0;
-# fi
-
-# quality_engineering=$(cat $DATAGREPPER_JSON | jq -r .msg.ci.email)
-# if [ $quality_engineering != "baseos-ci@redhat.com" ] ; then
-#     echo "bad QE"
-#     rm $DATAGREPPER_JSON;
-#     exit 0;
-# fi
-
-# xunit_version=$(cat $DATAGREPPER_JSON | jq -r .msg.version)
-# if [ -z $xunit_version ] || [[ ! $xunit_version =~ $VERSION_PATTERN ]]; then
-#     echo "bad version"
-#     rm $DATAGREPPER_JSON;
-#     exit 0;
-# fi
 
 TASK_ID=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.id)
 namespace=$(cat $DATAGREPPER_JSON | jq -r .msg.namespace)
@@ -81,12 +48,6 @@ REPORT_LOG="report.log"
 echo " --------------------------------------------------" >> $TASK_ID/$REPORT_LOG
 echo " received message from topic $topic - message valid" >> $TASK_ID/$REPORT_LOG
 
-#wget $SCRIPT_URL/$IMPORT_SCRIPT
-#wget $SCRIPT_URL/$PARSER
-#wget $SCRIPT_URL/$MERGER
-#wget $SCRIPT_URL/$RUNNING_SCRIPT
-#wget $SCRIPT_URL/$ERROR_SCRIPT
-#wget $SCRIPT_URL/$FUNCTIONS_SCRIPT
 chmod +x $IMPORT_SCRIPT
 chmod +x $RUNNING_SCRIPT
 chmod +x $ERROR_SCRIPT

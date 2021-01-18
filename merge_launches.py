@@ -18,13 +18,9 @@ def main(args):
     existing_launch = existing_launch[0]
     imported_launch = imported_launch[0]
 
-    #print(existing_launch['attributes'])
-    #print(imported_launch['attributes'])
-
     attributes_new = existing_launch['attributes']
 
     for item in imported_launch['attributes']:
-        #print(item)
         found = False
         for element in attributes_new:
             if(item['key'] == element['key'] and item['value'] == element['value']):

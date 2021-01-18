@@ -1,13 +1,6 @@
 #!/bin/bash
 
-#TODO
-# pridat v importe do regularnych buildov tag non-scratch aby bolo mozne lahko filtrovat v historii
-#treba ziskat info o scratch-buildoch a buidoch cez taskinfo -> brew taskinfo -v <task-id> + brew buildinfo <nvr> -> mas tu aj meno aj verziu, release, len to rozparsuj pekne
-#poriesit userov a ich prihlasovanie cez curl
-#poriesit jednotlive baliky aby boli ich vysledky importnute do spravnych projektov
-#success rate opravit
-#email server nastavit
-#containery su nejake divne co sa tyka nvr a build_id
+# script handling valid complete messages from UMB
 
 source functions.sh
 
@@ -58,8 +51,6 @@ echo " import_script: launch name - $ZIP_FILE" >> $TASK_ID/$REPORT_LOG
 python3 standardize_xunit.py $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER $ZIP_NAME > $TMP_FILE
 
 echo " import_script: created reportportal-results.xml, params: $FILE $TEST_PLAN_NAME $NVR $BUILD_ID $TASK_ID $SCRATCH $ISSUER $ZIP_NAME" >> $TASK_ID/$REPORT_LOG
-#cp $FILE $TASK_ID/$TEST_PLAN_NAME-original-res.xml
-#cp $TMP_FILE $TASK_ID/$TEST_PLAN_NAME-reportportal-results.xml
 
 zip -r $ZIP_FILE $TMP_FILE
 

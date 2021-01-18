@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script checks corret format of UMB message
+# and executes approriate script for module-builds
+
 IMPORT_SCRIPT="main.sh"
 RUNNING_SCRIPT="script.sh"
 ERROR_SCRIPT="error.sh"
@@ -37,7 +40,7 @@ elif [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.error" ] ; then
 fi
 
 COMPONENT=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.name)
-SCRATCH="unknown" #$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.scratch)
+SCRATCH="unknown"
 NVR=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.nsvc)
 ISSUER=$(cat $DATAGREPPER_JSON | jq -r .msg.artifact.issuer)
 REPORT_LOG="report.log"

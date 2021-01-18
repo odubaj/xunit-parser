@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# script handling valid running messages from UMB
+
 source functions.sh
 
 USERNAME=$1

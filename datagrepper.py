@@ -114,7 +114,6 @@ def get_messages():
                     ret = os.system("echo 'starting module-build script' >> actions.log")
                     print("skript pre module-buildy spusteny")
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
-                ret = os.system("echo '--------------------------------------------------' >> actions.log")
 
         time.sleep(10)
 

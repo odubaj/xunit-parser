@@ -160,7 +160,6 @@ def add_logs(testcase, arch_testsuite):
     """Creates links to logs of given testcase for ReportPortal XUnit"""
     existing_element = testcase.find('logs/log')
     if(existing_element != None):
-        #logs = etree.SubElement(arch_testsuite, "logs")
         for testcase_log in testcase.logs.log:
             log = etree.SubElement(arch_testsuite, "system-out")
             log.text = remove_control_chars(testcase_log.attrib['href'])
@@ -304,9 +303,6 @@ def main(args):
     global_props_dict["component"] = args.data[6]
 
     output_xml = etree.Element('testsuites')
-
-    #for testsuites in input_xml:
-        #print (testsuites.tag, testsuites.attrib)
 
     if not has_testcases(input_xml):
         create_error_output(output_xml)
