@@ -58,6 +58,10 @@ def get_messages():
                 print("konec!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`'\n'")
 
                 ret = os.system("echo '--------------------------------------------------' >> actions.log")
+                if('artifact' not in msg['msg']):
+                    print("artifact neexistuje")
+                    continue
+
                 ret = os.system("echo 'received msg with task-id "+str(msg['msg']['artifact']['id'])+"' >> actions.log")
 
                 if('category' not in msg['msg']):

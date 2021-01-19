@@ -264,6 +264,9 @@ def add_test_phases(testcase, arch_testsuite):
         result_element = testcase.find('properties/property[@{}="{}"]'.format("name", "baseosci.result"))
         testphase = etree.SubElement(arch_testsuite, "testcase", name="Test")
         add_logs(testcase, testphase)
+        # log = testcase.find('logs/log')
+        # if(log != None):
+        #     add_system_out(testphase, testcase.logs)
         if(result_element != None):
             add_additional_tag(testphase, result_element.attrib["value"].lower())
             arch_testsuite.set("result", result_element.attrib["value"])
