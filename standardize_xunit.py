@@ -39,8 +39,9 @@ def load_tf_xunit(tf_xunit_path):
 
 def has_testcases(xml):
     """Check if TestingFarm XUnit file has correct format"""
-    if hasattr(xml.testsuite[0], 'testcase'):
-        return True
+    if hasattr(xml, 'testsuite'):
+        if hasattr(xml.testsuite[0], 'testcase'):
+            return True
 
     return False
 
