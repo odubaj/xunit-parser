@@ -18,6 +18,7 @@ type=$(cat $DATAGREPPER_JSON | jq -r .msg.type)
 TEST_PLAN_NAME=$namespace.$type."functional"
 time=$2
 XUNIT_ORIGINAL="$TASK_ID/$TEST_PLAN_NAME-$time-original-res.xml"
+XUNIT_HASH="$TASK_ID/$TEST_PLAN_NAME-$time-original-xunit.txt"
 
 topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
 if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
@@ -31,7 +32,8 @@ if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
     if [[ $HASH =~ $URL_PATTERN ]]; then
         curl -s $HASH > $XUNIT_ORIGINAL
     else
-        python3 -c "import zlib,base64; print(zlib.decompress(base64.b64decode('$HASH')).decode('utf-8') )" > $XUNIT_ORIGINAL
+        echo $HASH > $XUNIT_HASH
+        python3 -c "from decode_xunit import decode_xunit; decode_xunit('$XUNIT_HASH')" > $XUNIT_ORIGINAL
     fi
 elif [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.error" ] ; then
     LOG1=$(cat $DATAGREPPER_JSON | jq -r .msg.run.debug)
