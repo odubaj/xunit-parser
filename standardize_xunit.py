@@ -309,9 +309,14 @@ def add_test_phases(testcase, arch_testsuite):
 # def add_time(arch_testsuite, time):
 #     arch_testsuite.set("time", time)
 
-def create_error_output(output_xml):
+def create_error_output(output_xml, dictionary):
     """Creates error output if TestingFarm XUnit does not have appropriate format"""
-    testsuite = etree.SubElement(output_xml, "testsuite", name="error")
+    testsuite = etree.SubElement(output_xml, "testsuite", name=dictionary["name"])
+    global_properties = etree.SubElement(testsuite, "global_properties")
+    for key in dictionary:
+        if (key == "name"):
+            continue
+        global_property = etree.SubElement(global_properties, "global_property", {"name" : key, "value" : dictionary[key]})
     testcase = etree.SubElement(testsuite, "testcase", name="error", result="ERROR")
     system_out = etree.SubElement(testcase, "system-out")
     system_out.text = remove_control_chars('No tests were run.')
@@ -340,7 +345,7 @@ def main(args):
     output_xml = etree.Element('testsuites')
 
     if not has_testcases(input_xml):
-        create_error_output(output_xml)
+        create_error_output(output_xml, global_props_dict)
     else:
         for testsuite in input_xml.testsuite:
             for testcase in testsuite.testcase:
