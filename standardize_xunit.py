@@ -214,6 +214,21 @@ def is_samed_named_phases(testcase):
     else:
         return (True, names)
 
+def is_samed_named_testcases(testsuite_arch):
+    """Checks if testcase phases are not samed-named in ReportPortal XUnit"""
+    names = []
+    for testcase_phase in testsuite_arch:
+        if testcase_phase.tag != "testcase":
+            continue
+        names.append(testcase_phase.attrib['name'])
+    
+    len_original = len(names)
+    new_names = list(dict.fromkeys(names))
+    if(len(new_names) == len_original):
+        return (False, [])
+    else:
+        return (True, names)
+
 def find_item_index(name, items):
     """Finds index of an item by name in array"""
     index = 0
@@ -234,7 +249,23 @@ def refactor_phases_names(testcase, names):
     for testcase_phase in testcase.phases.phase:
         if(testcase_phase.attrib['name'] in doubles):
             index = find_item_index(testcase_phase.attrib['name'], items)
-            testcase_phase.set("name", items[index][0] + str(items[index][1]))
+            testcase_phase.set("name", items[index][0] + " #" + str(items[index][1]))
+            items[index] = (items[index][0], items[index][1] + 1)
+
+def refactor_testcase_names(testsuite_arch, names):
+    """Refactors names of testphases of ReportPortal XUnit"""
+    doubles = [item for item, count in collections.Counter(names).items() if count > 1]
+    items = []
+    for item in doubles:
+        items.append((item, 1))
+
+    for testcase_phase in testsuite_arch:
+        if testcase_phase.tag != "testcase":
+            continue
+        if(testcase_phase.attrib['name'] in doubles):
+            index = find_item_index(testcase_phase.attrib['name'], items)
+            testcase_phase.set("name", items[index][0] + " #" + str(items[index][1]))
+            testcase_phase.set("id", testcase_phase.get("id") + " #" + str(items[index][1]))
             items[index] = (items[index][0], items[index][1] + 1)
 
 def add_test_phases(testcase, arch_testsuite):
@@ -326,12 +357,19 @@ def main(args):
                 add_test_phases(testcase, arch_testsuite)
     
     for compose_testsuite in output_xml:
-         for testcase_testsuite in compose_testsuite:
+        for testcase_testsuite in compose_testsuite:
             is_manual = testcase_testsuite.find('.//arch-property[@name="manual"]')
             if(is_manual != None):
                 testcase_testsuite_props = testcase_testsuite.find('properties')
                 if(testcase_testsuite_props != None):
                     testcase_testsuite_manual_property = etree.SubElement(testcase_testsuite_props, "property", name="manual", value="manual")
+
+    for compose_testsuite in output_xml:
+        for testcase_testsuite in compose_testsuite:
+            for arch_testsuite in testcase_testsuite:
+                same_named = is_samed_named_testcases(arch_testsuite)
+                if(same_named[0]):
+                    refactor_testcase_names(arch_testsuite, same_named[1])
 
     objectify.deannotate(output_xml, cleanup_namespaces=True, xsi_nil=True)
     print(etree.tostring(output_xml, pretty_print=True).decode())
