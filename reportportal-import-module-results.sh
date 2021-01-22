@@ -21,7 +21,7 @@ XUNIT_ORIGINAL="$TASK_ID/$TEST_PLAN_NAME-$time-original-res.xml"
 XUNIT_HASH="$TASK_ID/$TEST_PLAN_NAME-$time-original-xunit.txt"
 
 topic=$(cat $DATAGREPPER_JSON | jq -r .topic)
-if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
+if [ $topic == "VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
     HASH=$(cat $DATAGREPPER_JSON | jq -r .msg.xunit)
     if [ -z $HASH ] || [ $HASH == "null" ] ; then
         echo "no xunit"
@@ -35,7 +35,7 @@ if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
         echo $HASH > $XUNIT_HASH
         python3 -c "from decode_xunit import decode_xunit; decode_xunit('$XUNIT_HASH')" > $XUNIT_ORIGINAL
     fi
-elif [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.error" ] ; then
+elif [ $topic == "VirtualTopic.eng.ci.redhat-module.test.error" ] ; then
     LOG1=$(cat $DATAGREPPER_JSON | jq -r .msg.run.debug)
     LOG2=$(cat $DATAGREPPER_JSON | jq -r .msg.run.log)
     LOG3=$(cat $DATAGREPPER_JSON | jq -r .msg.run.log_raw)
@@ -54,9 +54,9 @@ chmod +x $IMPORT_SCRIPT
 chmod +x $RUNNING_SCRIPT
 chmod +x $ERROR_SCRIPT
 
-if [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
+if [ $topic == "VirtualTopic.eng.ci.redhat-module.test.complete" ] ; then
     ./$IMPORT_SCRIPT $USER $PASSWORD $XUNIT_ORIGINAL $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER $time
-elif [ $topic == "/topic/VirtualTopic.eng.ci.redhat-module.test.running" ] ; then
+elif [ $topic == "VirtualTopic.eng.ci.redhat-module.test.running" ] ; then
     ./$RUNNING_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER
 else
     ./$ERROR_SCRIPT $USER $PASSWORD $COMPONENT $SCRATCH $NVR $TASK_ID $TEST_PLAN_NAME $ISSUER $LOG1 $LOG2 $LOG3
