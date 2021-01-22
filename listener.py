@@ -161,8 +161,5 @@ if __name__ == '__main__':
 
     try:
         Container(UMBReceiver(brokers, "/home/odubaj/new-cert2.pem", topics)).run()
-    except KeyboardInterrupt: 
-        pass
-
     except Exception as exc:
         print(exc)
