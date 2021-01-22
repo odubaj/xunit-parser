@@ -8,6 +8,12 @@ import re
 
 VERSION_PATTERN="0\.1\.[0-9]*"
 
+def modify_to_string(identifier):
+    if(isinstance(identifier, str)):
+        return identifier
+    else:
+        return str(identifier)
+
 def get_messages():
 
     topic_running = '/topic/VirtualTopic.eng.ci.brew-build.test.running'
@@ -62,7 +68,7 @@ def get_messages():
                     print("artifact neexistuje")
                     continue
 
-                ret = os.system("echo 'received msg with task-id "+str(msg['msg']['artifact']['id'])+"' >> actions.log")
+                ret = os.system("echo 'received msg with task-id "+modify_to_string(msg['msg']['artifact']['id'])+"' >> actions.log")
 
                 if('category' not in msg['msg']):
                     print("category neexistuje")
