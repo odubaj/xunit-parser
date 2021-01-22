@@ -47,13 +47,13 @@ class Handler(FileSystemEventHandler):
                     ret = os.system("mv "+DIRECTORY_TO_WATCH+filename+" "+new_file_position)
 
                     if("redhat-module" not in json_object['topic']):
-                        ret = os.system("sh reportportal-import-results.sh "+new_file_position+" "+str(mytime))
                         ret = os.system("echo 'starting brew-build script for task "+json_object['msg']['artifact']['id']+"' >> actions.log")
-                        print("skript pre brew-buildy spusteny")
+                        ret = os.system("sh reportportal-import-results.sh "+new_file_position+" "+str(mytime))
+                        print("skript pre brew-buildy uspesne ukonceny")
                     else:
-                        ret = os.system("sh reportportal-import-module-results.sh "+new_file_position+" "+str(mytime))
                         ret = os.system("echo 'starting module-build script for task "+json_object['msg']['artifact']['id']+"' >> actions.log")
-                        print("skript pre module-buildy spusteny")
+                        ret = os.system("sh reportportal-import-module-results.sh "+new_file_position+" "+str(mytime))
+                        print("skript pre module-buildy uspesne ukonceny")
 
                 time.sleep(5)
 
