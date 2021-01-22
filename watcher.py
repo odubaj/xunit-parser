@@ -40,7 +40,7 @@ class Handler(FileSystemEventHandler):
                 if filename.startswith("ID:"):
                     json_file = open(DIRECTORY_TO_WATCH + filename, "r") 
                     json_object = json.load(json_file)
-                    ret = os.system("mkdir -p "+msg['msg']['artifact']['id'])
+                    ret = os.system("mkdir -p "+json_object['msg']['artifact']['id'])
                     mytime = round(time.time() * 1000)
                     topic_name = json_object['topic'].split('.')[5]
                     new_file_position = "/root/datagrepper-downloader/"+json_object['msg']['artifact']['id']+"/"+json_object['msg']['namespace']+"."+json_object['msg']['type']+".functional"+"-"+str(mytime)+"-"+topic_name+"-datagrepper.json"
