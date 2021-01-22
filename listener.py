@@ -160,6 +160,6 @@ if __name__ == '__main__':
                     topics.append(topic)
 
     try:
-        Container(UMBReceiver(brokers, "/home/odubaj/new-cert2.pem", topics)).run()
+        Container(UMBReceiver(brokers, "root/new-cert.pem", topics)).run()
     except Exception as exc:
         print(exc)
