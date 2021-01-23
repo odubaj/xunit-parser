@@ -84,7 +84,7 @@ class Handler(FileSystemEventHandler):
     def handle_brew_build(self, json_object, test_plan_name, task_id, mytime):
         xunit_original = task_id+"/"+test_plan_name+"-"+"-"+mytime+"-original-res.xml"
         component = json_object["msg"]["artifact"]["component"]
-        scratch = str(json_object["msg"]["artifact"]["scratch"])
+        scratch = str(json_object["msg"]["artifact"]["scratch"]).lower()
         nvr = json_object["msg"]["artifact"]["nvr"]
         issuer = json_object["msg"]["artifact"]["issuer"]
 
