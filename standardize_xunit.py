@@ -341,6 +341,8 @@ def main(args):
     global_props_dict["scratch-build"] = args.data[4]
     global_props_dict["issuer"] = args.data[5]
     global_props_dict["component"] = args.data[6]
+    if ("rh-" == args.data[6][0:3]):
+        global_props_dict["rhscl"] = "rhscl"
 
     output_xml = etree.Element('testsuites')
 

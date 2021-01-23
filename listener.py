@@ -14,7 +14,7 @@ from proton.handlers import MessagingHandler
 from proton.reactor import Container, Selector
 
 VERSION_PATTERN="0\.1\.[0-9]*"
-QUEUE="/root/datagrepper-downloader/queue/"
+QUEUE=os.getcwd()+"/queue/"
 
 class UMBReceiver(MessagingHandler):
     def modify_to_string(self, identifier):
@@ -24,13 +24,13 @@ class UMBReceiver(MessagingHandler):
             return str(identifier)
 
     def check_incoming_message(self, body):
-        ret = os.system("echo '--------------------------------------------------' >> actions.log")
-
         if('artifact' not in body):
             print("artifact neexistuje")
             return False
 
-        ret = os.system("echo 'received msg with task-id "+self.modify_to_string(body['artifact']['id'])+"' >> actions.log")
+        with open("actions_listener.log", "a") as actions_file:
+            actions_file.write("--------------------------------------------------\n")
+            actions_file.write("received msg with task-id "+self.modify_to_string(body['artifact']['id'])+"\n")
 
         if('category' not in body):
             print("category neexistuje")
@@ -121,7 +121,8 @@ class UMBReceiver(MessagingHandler):
 
         valid_msg = self.check_incoming_message(body)
         if(valid_msg):
-            ret = os.system("echo 'msg valid, topic: "+message.address[8:]+", plan: "+body['namespace']+"."+body['type']+".functional' >> actions.log")
+            with open("actions_listener.log", "a") as actions_file:
+                actions_file.write("msg valid, topic: "+msg_topic+", plan: "+body['namespace']+"."+body['type']+"\n")
 
             text_file = open(QUEUE+msg_id, "w")
             text_file.write(json.dumps(tmp_msg_object))
