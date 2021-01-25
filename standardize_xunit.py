@@ -343,6 +343,8 @@ def main(args):
     global_props_dict["component"] = args.data[6]
     if ("rh-" == args.data[6][0:3]):
         global_props_dict["rhscl"] = "rhscl"
+    if(("redhat-module" not in args.data[0]) and ("rh-" != args.data[6][0:3])):
+        global_props_dict["rpm-package"] = "rpm-package"
 
     output_xml = etree.Element('testsuites')
 
