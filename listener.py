@@ -160,7 +160,10 @@ if __name__ == '__main__':
                     topic = 'VirtualTopic.eng.{}.{}.{}.{}'.format(topic_root, artifact_type, stage, state)
                     topics.append(topic)
 
-    try:
-        Container(UMBReceiver(brokers, "/root/new-cert.pem", topics)).run()
-    except Exception as exc:
-        print(exc)
+    while True:
+        try:
+            Container(UMBReceiver(brokers, "/root/new-cert.pem", topics)).run()
+        except Exception as exc:
+            print(exc)
+
+        time.sleep(10)

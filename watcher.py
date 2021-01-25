@@ -151,7 +151,11 @@ class Handler(FileSystemEventHandler):
 
 if __name__ == '__main__':
     w = Watcher()
-    try:
-        w.run()
-    except Exception as exc:
-        print(exc)
+
+    while True:
+        try:
+            w.run()
+        except Exception as exc:
+            print(exc)
+
+        time.sleep(10)
