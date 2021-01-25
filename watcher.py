@@ -90,7 +90,7 @@ class Handler(FileSystemEventHandler):
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.brew-build.test.complete"):
             if ('xunit' not in json_object["msg"]):
-                print("no xunit")
+                #print("no xunit")
                 return
             
             pattern = re.compile(URL_PATTERN)
@@ -124,7 +124,7 @@ class Handler(FileSystemEventHandler):
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.redhat-module.test.complete"):
             if ('xunit' not in json_object["msg"]):
-                print("no xunit")
+                #print("no xunit")
                 return
             
             pattern = re.compile(URL_PATTERN)

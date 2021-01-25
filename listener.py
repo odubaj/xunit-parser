@@ -25,7 +25,7 @@ class UMBReceiver(MessagingHandler):
 
     def check_incoming_message(self, body):
         if('artifact' not in body):
-            print("artifact neexistuje")
+            #print("artifact neexistuje")
             return False
 
         with open("actions_listener.log", "a") as actions_file:
@@ -33,35 +33,35 @@ class UMBReceiver(MessagingHandler):
             actions_file.write("received msg with task-id "+self.modify_to_string(body['artifact']['id'])+"\n")
 
         if('category' not in body):
-            print("category neexistuje")
+            #print("category neexistuje")
             return False
         else:
             if (body['category'] != "functional"):
-                print(body['category'])
-                print("nefunkcionalne")
+                #print(body['category'])
+                #print("nefunkcionalne")
                 return False
 
         if('ci' not in body):
-            print("ci neexistuje")
+            #print("ci neexistuje")
             return False
         else:
             if('email' not in body['ci']):
-                print("email neexistuje")
+                #print("email neexistuje")
                 return False
             else:
                 if (body['ci']['email'] != "baseos-ci@redhat.com"):
-                    print("zly mail")
-                    print(body['ci']['email'])
+                    #print("zly mail")
+                    #print(body['ci']['email'])
                     return False
 
         if('version' not in body):
-            print("version neexistuje")
+            #print("version neexistuje")
             return False
         else:
             pattern = re.compile(VERSION_PATTERN)
             if (not pattern.match(body['version'])):
-                print(body['version'])
-                print("zla version")
+                #print(body['version'])
+                #print("zla version")
                 return False
 
         return True
@@ -102,7 +102,7 @@ class UMBReceiver(MessagingHandler):
             event.container.create_receiver(conn, source='queue://Consumer.{}.{}.{}'.format(self.umb_username, self.uuid, topic), options=options)
 
     def on_message(self, event):
-        print("------------------------------------------------------")
+        #print("------------------------------------------------------")
 
         message = event.message
         msg_id = message.id
@@ -126,7 +126,7 @@ class UMBReceiver(MessagingHandler):
 
             text_file = open(QUEUE+msg_id, "w")
             text_file.write(json.dumps(tmp_msg_object))
-            print("subor vytvoreny")
+            #print("subor vytvoreny")
             text_file.close()
 
     def on_link_error(self, event):
