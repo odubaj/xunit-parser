@@ -58,7 +58,7 @@ class Handler(FileSystemEventHandler):
                         break
                 except Exception as exc:
                     with open("actions_watcher.log", "a") as actions_file:
-                        actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed: "+exc+"\n")
+                        actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed: "+str(exc)+"\n")
                     break
 
                 if filename.startswith("ID:"):
