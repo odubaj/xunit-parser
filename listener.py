@@ -16,6 +16,7 @@ from proton.reactor import Container, Selector
 VERSION_PATTERN="0\.1\.[0-9]*"
 QUEUE=os.getcwd()+"/queue/"
 
+"""class listening on UMB"""
 class UMBReceiver(MessagingHandler):
     def modify_to_string(self, identifier):
         if(isinstance(identifier, str)):
@@ -23,50 +24,40 @@ class UMBReceiver(MessagingHandler):
         else:
             return str(identifier)
 
+    """check valid format of UMB message"""
     def check_incoming_message(self, body):
         if('artifact' not in body):
-            #print("artifact neexistuje")
             return False
 
         with open("actions_listener.log", "a") as actions_file:
             actions_file.write("--------------------------------------------------\n")
-            actions_file.write("received msg with task-id "+self.modify_to_string(body['artifact']['id'])+"\n")
+            actions_file.write(time.ctime(time.time())+": received msg with task-id "+self.modify_to_string(body['artifact']['id'])+"\n")
 
         if('category' not in body):
-            #print("category neexistuje")
             return False
         else:
             if (body['category'] != "functional"):
-                #print(body['category'])
-                #print("nefunkcionalne")
                 return False
 
         if('ci' not in body):
-            #print("ci neexistuje")
             return False
         else:
             if('email' not in body['ci']):
-                #print("email neexistuje")
                 return False
             else:
                 if (body['ci']['email'] != "baseos-ci@redhat.com"):
-                    #print("zly mail")
-                    #print(body['ci']['email'])
                     return False
 
         if('version' not in body):
-            #print("version neexistuje")
             return False
         else:
             pattern = re.compile(VERSION_PATTERN)
             if (not pattern.match(body['version'])):
-                #print(body['version'])
-                #print("zla version")
                 return False
 
         return True
 
-
+    """initialization of UMB receiver"""
     def __init__(self, url, creds_filename, topics):
         super(UMBReceiver, self).__init__()
         self.url = url
@@ -75,17 +66,21 @@ class UMBReceiver(MessagingHandler):
         self.umb_username = "client-citool"
         
         uuid_anchor = socket.gethostname()
-        print("Initial uuid anchor: %s" % uuid_anchor)
+        with open("actions_listener.log", "a") as actions_file:
+            actions_file.write(time.ctime(time.time())+": Initial uuid anchor: %s\n" % uuid_anchor)
         with open('/proc/self/cgroup', 'r') as cgroup:
             content = cgroup.read()
             match = re.match(r"^.*-([0-9a-fA-F]+)\.scope$", content, re.MULTILINE|re.DOTALL)
             if match:
                 uuid_anchor = match.group(1)
-                print("Switch to uuid anchor: %s" % uuid_anchor)
+                with open("actions_listener.log", "a") as actions_file:
+                    actions_file.write(time.ctime(time.time())+": Switch to uuid anchor: %s\n" % uuid_anchor)
         self.uuid = uuid.uuid3(uuid.NAMESPACE_DNS, uuid_anchor)
         self.uuid = str(self.uuid)
-        print("Use uuid: %s" % self.uuid)
+        with open("actions_listener.log", "a") as actions_file:
+            actions_file.write(time.ctime(time.time())+": Use uuid: %s\n" % self.uuid)
 
+    """starting UMB receiver"""
     def on_start(self, event):
         domain = SSLDomain(SSLDomain.MODE_CLIENT)
         domain.set_credentials(self.creds_filename, self.creds_filename, None)
@@ -101,9 +96,8 @@ class UMBReceiver(MessagingHandler):
             print('Listening on topic {}'.format(topic))
             event.container.create_receiver(conn, source='queue://Consumer.{}.{}.{}'.format(self.umb_username, self.uuid, topic), options=options)
 
+    """process received message"""
     def on_message(self, event):
-        #print("------------------------------------------------------")
-
         message = event.message
         msg_id = message.id
         msg_topic = message.address[8:]
@@ -111,7 +105,8 @@ class UMBReceiver(MessagingHandler):
         try:
             body = json.loads(event.message.body)
         except Exception as exc:
-            print('{}: cannot decode body'.format(msg_id))
+            with open("actions_listener.log", "a") as actions_file:
+                actions_file.write(time.ctime(time.time())+': {}: cannot decode body'.format(msg_id))
             return
 
         tmp_msg_object = {
@@ -122,30 +117,32 @@ class UMBReceiver(MessagingHandler):
         valid_msg = self.check_incoming_message(body)
         if(valid_msg):
             with open("actions_listener.log", "a") as actions_file:
-                actions_file.write("msg valid, topic: "+msg_topic+", plan: "+body['namespace']+"."+body['type']+"\n")
+                actions_file.write(time.ctime(time.time())+": msg valid, topic: "+msg_topic+", plan: "+body['namespace']+"."+body['type']+"\n")
 
             text_file = open(QUEUE+msg_id, "w")
             text_file.write(json.dumps(tmp_msg_object))
-            #print("subor vytvoreny")
             text_file.close()
 
+    """resolve link error"""
     def on_link_error(self, event):
-        print("link error")
         cond = event.link.remote_condition
-        print('link error: {}: {}'.format(cond.name, cond.description))
+        with open("actions_listener.log", "a") as actions_file:
+            actions_file.write(time.ctime(time.time())+': link error: {}: {}'.format(cond.name, cond.description))
 
         event.connection.close()
 
+    """resolve transport error"""
     def on_transport_error(self, event):
-        print("transport error")
         if event.transport.condition:
             cond = event.transport.condition
-            print('transport error: {}: {}'.format(cond.name, cond.description))
+            with open("actions_listener.log", "a") as actions_file:
+                actions_file.write(time.ctime(time.time())+': transport error: {}: {}'.format(cond.name, cond.description))
             if event.transport.condition.name in self.fatal_conditions:
                 event.connection.close()
 
         else:
-            print('unspecified transport error')
+            with open("actions_listener.log", "a") as actions_file:
+                actions_file.write(time.ctime(time.time())+': unspecified transport error')
 
 if __name__ == '__main__': 
 

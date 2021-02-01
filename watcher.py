@@ -5,6 +5,7 @@ import json
 import zlib
 import re
 import base64
+import env_file
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -14,12 +15,10 @@ DIRECTORY_TO_WATCH = ROOT_DIR+"/queue/"
 IMPORT_SCRIPT = "main.sh"
 RUNNING_SCRIPT = "script.sh"
 ERROR_SCRIPT = "error.sh"
-USER = "superadmin"
-PASSWORD = "aQsWdEfR1029"
-#PASSWORD = "erebus"
 URL_PATTERN="http[s]*:*"
 REPORT_LOG="report.log"
 
+"""watcher of a disk queue"""
 class Watcher:
     def __init__(self):
         self.observer = Observer()
@@ -37,7 +36,7 @@ class Watcher:
 
         self.observer.join()
 
-
+"""handler on change event"""
 class Handler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
@@ -46,7 +45,10 @@ class Handler(FileSystemEventHandler):
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.
             print ("Received modified event - %s." % event.src_path)
+            with open("actions_watcher.log", "a") as actions_file:
+                actions_file.write(time.ctime(time.time())+": Received modified event - %s.\n" % event.src_path)
             for filename in os.listdir(DIRECTORY_TO_WATCH):
+                #check curl -Is http://reportportal.infrastructure.testing-farm.io/api | head -1
                 if filename.startswith("ID:"):
                     json_file = open(DIRECTORY_TO_WATCH + filename, "r") 
                     json_object = json.load(json_file)
@@ -63,24 +65,23 @@ class Handler(FileSystemEventHandler):
 
                     if("redhat-module" not in json_object['topic']):
                         with open("actions_watcher.log", "a") as actions_file:
-                            actions_file.write("starting brew-build script for task "+task_id+"\n")
+                            actions_file.write(time.ctime(time.time())+": starting brew-build script for task "+task_id+"\n")
                         self.handle_brew_build(json_object, test_plan_name, task_id, mytime)
-                        print("skript pre brew-buildy uspesne ukonceny")
                     else:
                         with open("actions_watcher.log", "a") as actions_file:
-                            actions_file.write("starting module-build script for task "+task_id+"\n")
+                            actions_file.write(time.ctime(time.time())+": starting module-build script for task "+task_id+"\n")
                         self.handle_module_build(json_object, test_plan_name, task_id, mytime)
-                        print("skript pre module-buildy uspesne ukonceny")
 
                 time.sleep(3)
 
+    """decode xunit"""
     def decode_xunit(self, hash, xunit_orig):
         decoded = zlib.decompress(base64.b64decode(hash)).decode('utf-8')
 
         with open(xunit_orig, "a") as xunit_file:
             xunit_file.write(decoded)
 
-
+    """handle brew-build"""
     def handle_brew_build(self, json_object, test_plan_name, task_id, mytime):
         xunit_original = task_id+"/"+test_plan_name+"-"+"-"+mytime+"-original-res.xml"
         component = json_object["msg"]["artifact"]["component"]
@@ -90,7 +91,6 @@ class Handler(FileSystemEventHandler):
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.brew-build.test.complete"):
             if ('xunit' not in json_object["msg"]):
-                #print("no xunit")
                 return
             
             pattern = re.compile(URL_PATTERN)
@@ -103,18 +103,22 @@ class Handler(FileSystemEventHandler):
                 report_file.write(" --------------------------------------------------\n")
                 report_file.write(" received message from topic "+json_object['topic']+"  - message valid\n")
 
-            ret = os.system("./"+IMPORT_SCRIPT+" "+USER+" "+PASSWORD+" "+xunit_original+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+mytime)
+            user = os.environ.get("USER")
+            password = os.environ.get("PASSWORD")
+
+            ret = os.system("./"+IMPORT_SCRIPT+" "+user+" "+password+" "+xunit_original+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+mytime)
 
         elif(json_object['topic'] == "VirtualTopic.eng.ci.brew-build.test.error"):
             log1 = json_object["msg"]["run"]["debug"]
             log2 = json_object["msg"]["run"]["log"]
             log3 = json_object["msg"]["run"]["log_raw"]
 
-            ret = os.system("./"+ERROR_SCRIPT+" "+USER+" "+PASSWORD+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+log1+" "+log2+" "+log3)
+            ret = os.system("./"+ERROR_SCRIPT+" "+user+" "+password+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+log1+" "+log2+" "+log3)
 
         elif(json_object['topic'] == "VirtualTopic.eng.ci.brew-build.test.running"):
-            ret = os.system("./"+RUNNING_SCRIPT+" "+USER+" "+PASSWORD+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer)
+            ret = os.system("./"+RUNNING_SCRIPT+" "+user+" "+password+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer)
 
+    """handle module build"""
     def handle_module_build(self, json_object, test_plan_name, task_id, mytime):
         xunit_original = task_id+"/"+test_plan_name+"-"+"-"+mytime+"-original-res.xml"
         component = json_object["msg"]["artifact"]["name"]
@@ -124,7 +128,6 @@ class Handler(FileSystemEventHandler):
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.redhat-module.test.complete"):
             if ('xunit' not in json_object["msg"]):
-                #print("no xunit")
                 return
             
             pattern = re.compile(URL_PATTERN)
@@ -137,23 +140,27 @@ class Handler(FileSystemEventHandler):
                 report_file.write(" --------------------------------------------------\n")
                 report_file.write(" received message from topic "+json_object['topic']+"  - message valid\n")
 
-            ret = os.system("./"+IMPORT_SCRIPT+" "+USER+" "+PASSWORD+" "+xunit_original+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+mytime)
+            user = os.environ.get("USER")
+            password = os.environ.get("PASSWORD")
+
+            ret = os.system("./"+IMPORT_SCRIPT+" "+user+" "+password+" "+xunit_original+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+mytime)
 
         elif(json_object['topic'] == "VirtualTopic.eng.ci.redhat-module.test.error"):
             log1 = json_object["msg"]["run"]["debug"]
             log2 = json_object["msg"]["run"]["log"]
             log3 = json_object["msg"]["run"]["log_raw"]
 
-            ret = os.system("./"+ERROR_SCRIPT+" "+USER+" "+PASSWORD+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+log1+" "+log2+" "+log3)
+            ret = os.system("./"+ERROR_SCRIPT+" "+user+" "+password+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+log1+" "+log2+" "+log3)
 
         elif(json_object['topic'] == "VirtualTopic.eng.ci.redhat-module.test.running"):
-            ret = os.system("./"+RUNNING_SCRIPT+" "+USER+" "+PASSWORD+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer)
+            ret = os.system("./"+RUNNING_SCRIPT+" "+user+" "+password+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer)
 
 if __name__ == '__main__':
     w = Watcher()
 
     while True:
         try:
+            env_file.load('.env')
             w.run()
         except Exception as exc:
             print(exc)
