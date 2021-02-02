@@ -99,6 +99,8 @@ class Handler(FileSystemEventHandler):
         scratch = str(json_object["msg"]["artifact"]["scratch"]).lower()
         nvr = json_object["msg"]["artifact"]["nvr"]
         issuer = json_object["msg"]["artifact"]["issuer"]
+        user = os.environ.get("USER")
+        password = os.environ.get("PASSWORD")
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.brew-build.test.complete"):
             if ('xunit' not in json_object["msg"]):
@@ -113,9 +115,6 @@ class Handler(FileSystemEventHandler):
             with open(task_id+"/"+REPORT_LOG, "a") as report_file:
                 report_file.write(" --------------------------------------------------\n")
                 report_file.write(" received message from topic "+json_object['topic']+"  - message valid\n")
-
-            user = os.environ.get("USER")
-            password = os.environ.get("PASSWORD")
 
             ret = os.system("./"+IMPORT_SCRIPT+" "+user+" "+password+" "+xunit_original+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+mytime)
 
@@ -136,6 +135,8 @@ class Handler(FileSystemEventHandler):
         scratch = "unknown"
         nvr = json_object["msg"]["artifact"]["nsvc"]
         issuer = json_object["msg"]["artifact"]["issuer"]
+        user = os.environ.get("USER")
+        password = os.environ.get("PASSWORD")
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.redhat-module.test.complete"):
             if ('xunit' not in json_object["msg"]):
@@ -150,9 +151,6 @@ class Handler(FileSystemEventHandler):
             with open(task_id+"/"+REPORT_LOG, "a") as report_file:
                 report_file.write(" --------------------------------------------------\n")
                 report_file.write(" received message from topic "+json_object['topic']+"  - message valid\n")
-
-            user = os.environ.get("USER")
-            password = os.environ.get("PASSWORD")
 
             ret = os.system("./"+IMPORT_SCRIPT+" "+user+" "+password+" "+xunit_original+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer+" "+mytime)
 
