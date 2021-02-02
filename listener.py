@@ -106,7 +106,7 @@ class UMBReceiver(MessagingHandler):
             body = json.loads(event.message.body)
         except Exception as exc:
             with open("actions_listener.log", "a") as actions_file:
-                actions_file.write(time.ctime(time.time())+': {}: cannot decode body'.format(msg_id))
+                actions_file.write(time.ctime(time.time())+': {}: cannot decode body\n'.format(msg_id))
             return
 
         tmp_msg_object = {
@@ -127,7 +127,7 @@ class UMBReceiver(MessagingHandler):
     def on_link_error(self, event):
         cond = event.link.remote_condition
         with open("actions_listener.log", "a") as actions_file:
-            actions_file.write(time.ctime(time.time())+': link error: {}: {}'.format(cond.name, cond.description))
+            actions_file.write(time.ctime(time.time())+': link error: {}: {}\n'.format(cond.name, cond.description))
 
         event.connection.close()
 
@@ -136,13 +136,13 @@ class UMBReceiver(MessagingHandler):
         if event.transport.condition:
             cond = event.transport.condition
             with open("actions_listener.log", "a") as actions_file:
-                actions_file.write(time.ctime(time.time())+': transport error: {}: {}'.format(cond.name, cond.description))
+                actions_file.write(time.ctime(time.time())+': transport error: {}: {}\n'.format(cond.name, cond.description))
             if event.transport.condition.name in self.fatal_conditions:
                 event.connection.close()
 
         else:
             with open("actions_listener.log", "a") as actions_file:
-                actions_file.write(time.ctime(time.time())+': unspecified transport error')
+                actions_file.write(time.ctime(time.time())+': unspecified transport error\n')
 
 if __name__ == '__main__': 
 
