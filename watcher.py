@@ -52,14 +52,13 @@ class Handler(FileSystemEventHandler):
                 try:
                     with urllib.request.urlopen("http://reportportal.infrastructure.testing-farm.io/api") as url:
                         code = url.getcode()
+                except Exception as exc:
+                    code = exc.getcode()
+                finally:
                     if(code >= 500):
                         with open("actions_watcher.log", "a") as actions_file:
                             actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed\n")
                         break
-                except Exception as exc:
-                    with open("actions_watcher.log", "a") as actions_file:
-                        actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed: "+str(exc)+"\n")
-                    break
 
                 if filename.startswith("ID:"):
                     json_file = open(DIRECTORY_TO_WATCH + filename, "r") 
