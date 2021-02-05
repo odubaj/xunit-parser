@@ -6,7 +6,7 @@ import zlib
 import re
 import base64
 import env_file
-import urllib.request
+import requests
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -50,11 +50,11 @@ class Handler(FileSystemEventHandler):
                 actions_file.write(time.ctime(time.time())+": Received modified event - %s.\n" % event.src_path)
             for filename in os.listdir(DIRECTORY_TO_WATCH):
                 try:
-                    with urllib.request.urlopen("http://reportportal.infrastructure.testing-farm.io/api") as url:
-                        code = url.getcode()
-                    with open("actions_watcher.log", "a") as actions_file:
-                        actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed\n")
-                    break
+                    r = requests.head("http://reportportal.infrastructure.testing-farm.io/api")
+                    if(r.status_code >= 404):
+                        with open("actions_watcher.log", "a") as actions_file:
+                            actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed\n")
+                        break
                 except Exception as exc:
                     with open("actions_watcher.log", "a") as actions_file:
                         actions_file.write(time.ctime(time.time())+": ReportPortal API down(exception), cannot proceed\n")
