@@ -9,6 +9,7 @@ import env_file
 import requests
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from pathlib import Path
 
 ROOT_DIR = os.getcwd()
 DIRECTORY_TO_WATCH = ROOT_DIR+"/queue/"
@@ -48,7 +49,7 @@ class Handler(FileSystemEventHandler):
             print ("Received modified event - %s." % event.src_path)
             with open("actions_watcher.log", "a") as actions_file:
                 actions_file.write(time.ctime(time.time())+": Received modified event - %s.\n" % event.src_path)
-            for filename in os.listdir(DIRECTORY_TO_WATCH):
+            for filename in sorted(Path(DIRECTORY_TO_WATCH).iterdir(), key=os.path.getmtime):
                 try:
                     r = requests.head("http://reportportal.infrastructure.testing-farm.io/api")
                     if(r.status_code >= 404):
@@ -60,8 +61,8 @@ class Handler(FileSystemEventHandler):
                         actions_file.write(time.ctime(time.time())+": ReportPortal API down(exception), cannot proceed\n")
                     break
 
-                if filename.startswith("ID:"):
-                    json_file = open(DIRECTORY_TO_WATCH + filename, "r") 
+                if os.path.basename(filename).startswith("ID:"):
+                    json_file = open(filename, "r")
                     json_object = json.load(json_file)
 
                     task_id = json_object['msg']['artifact']['id']
@@ -72,7 +73,7 @@ class Handler(FileSystemEventHandler):
                     topic_name = json_object['topic'].split('.')[5]
                     test_plan_name = json_object['msg']['namespace']+"."+json_object['msg']['type']+".functional"
                     new_file_position = ROOT_DIR+"/"+task_id+"/"+test_plan_name+"-"+mytime+"-"+topic_name+"-datagrepper.json"
-                    os.replace(DIRECTORY_TO_WATCH+filename, new_file_position)
+                    os.replace(filename, new_file_position)
 
                     if("redhat-module" not in json_object['topic']):
                         with open("actions_watcher.log", "a") as actions_file:
