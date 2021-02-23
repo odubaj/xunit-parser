@@ -159,7 +159,7 @@ if __name__ == '__main__':
 
     while True:
         try:
-            Container(UMBReceiver(brokers, "/root/new-cert.pem", topics)).run()
+            Container(UMBReceiver(brokers, "/opt/cert.pem", topics)).run()
         except Exception as exc:
             print(exc)
 

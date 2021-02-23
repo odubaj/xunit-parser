@@ -260,4 +260,4 @@ function logs_error_item() {
 }
 
 #RP_URL="http://localhost:8080"
-RP_URL="http://reportportal.infrastructure.testing-farm.io"
+RP_URL="http://reportportal.osci.redhat.com"

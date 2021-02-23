@@ -51,7 +51,7 @@ class Handler(FileSystemEventHandler):
                 actions_file.write(time.ctime(time.time())+": Received modified event - %s.\n" % event.src_path)
             for filename in sorted(Path(DIRECTORY_TO_WATCH).iterdir(), key=os.path.getmtime):
                 try:
-                    r = requests.head("http://reportportal.infrastructure.testing-farm.io/api")
+                    r = requests.head("http://reportportal.osci.redhat.com/api")
                     if(r.status_code >= 404):
                         with open("actions_watcher.log", "a") as actions_file:
                             actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed\n")
