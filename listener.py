@@ -136,7 +136,7 @@ class UMBReceiver(MessagingHandler):
             logging.error('unspecified transport error')
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='actions_listener.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
+    logging.basicConfig(filename='actions_listener.log', encoding='utf-8', level=logging.INFO, format='%(asctime)s %(message)s')
 
     topics = []
     brokers = ['amqps://messaging-devops-broker01.web.prod.ext.phx2.redhat.com:5671',

@@ -161,7 +161,7 @@ class Handler(FileSystemEventHandler):
             ret = os.system("./"+RUNNING_SCRIPT+" "+user+" "+password+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer)
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='actions_watcher.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
+    logging.basicConfig(filename='actions_watcher.log', encoding='utf-8', level=logging.INFO, format='%(asctime)s %(message)s')
     w = Watcher()
 
     while True:
