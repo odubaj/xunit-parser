@@ -7,6 +7,7 @@ import re
 import base64
 import env_file
 import requests
+import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from pathlib import Path
@@ -34,7 +35,7 @@ class Watcher:
                 time.sleep(5)
         except Exception as exc:
             self.observer.stop()
-            print(exc)
+            logging.error('Watcher: %s', str(exc))
 
         self.observer.join()
 
@@ -46,19 +47,15 @@ class Handler(FileSystemEventHandler):
 
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.
-            print ("Received modified event - %s." % event.src_path)
-            with open("actions_watcher.log", "a") as actions_file:
-                actions_file.write(time.ctime(time.time())+": Received modified event - %s.\n" % event.src_path)
+            logging.info("Received modified event: %s", event.src_path)
             for filename in sorted(Path(DIRECTORY_TO_WATCH).iterdir(), key=os.path.getmtime):
                 try:
                     r = requests.head("http://reportportal.osci.redhat.com/api")
                     if(r.status_code >= 404):
-                        with open("actions_watcher.log", "a") as actions_file:
-                            actions_file.write(time.ctime(time.time())+": ReportPortal API down, cannot proceed\n")
+                        logging.warning("ReportPortal API down, cannot proceed")
                         break
                 except Exception as exc:
-                    with open("actions_watcher.log", "a") as actions_file:
-                        actions_file.write(time.ctime(time.time())+": ReportPortal API down(exception), cannot proceed\n")
+                    logging.warning("ReportPortal API down(exception), cannot proceed")
                     break
 
                 if os.path.basename(filename).startswith("ID:"):
@@ -76,12 +73,10 @@ class Handler(FileSystemEventHandler):
                     os.replace(filename, new_file_position)
 
                     if("redhat-module" not in json_object['topic']):
-                        with open("actions_watcher.log", "a") as actions_file:
-                            actions_file.write(time.ctime(time.time())+": starting brew-build script for task "+task_id+"\n")
+                        logging.info("starting brew-build script for task %s", task_id)
                         self.handle_brew_build(json_object, test_plan_name, task_id, mytime)
                     else:
-                        with open("actions_watcher.log", "a") as actions_file:
-                            actions_file.write(time.ctime(time.time())+": starting module-build script for task "+task_id+"\n")
+                        logging.info("starting module-build script for task %s", task_id)
                         self.handle_module_build(json_object, test_plan_name, task_id, mytime)
 
                 time.sleep(3)
@@ -166,6 +161,7 @@ class Handler(FileSystemEventHandler):
             ret = os.system("./"+RUNNING_SCRIPT+" "+user+" "+password+" "+component+" "+scratch+" "+nvr+" "+task_id+" "+test_plan_name+" "+issuer)
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='actions_watcher.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
     w = Watcher()
 
     while True:
@@ -173,6 +169,6 @@ if __name__ == '__main__':
             env_file.load('.env')
             w.run()
         except Exception as exc:
-            print(exc)
+            logging.error('Main: %s', str(exc))
 
         time.sleep(10)
