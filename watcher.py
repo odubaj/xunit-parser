@@ -50,7 +50,7 @@ class Handler(FileSystemEventHandler):
             logging.info("Received modified event: %s", event.src_path)
             for filename in sorted(Path(DIRECTORY_TO_WATCH).iterdir(), key=os.path.getmtime):
                 try:
-                    r = requests.head("http://reportportal.osci.redhat.com/api")
+                    r = requests.head("http://reportportal.osci.redhat.com:8080/api")
                     if(r.status_code >= 404):
                         logging.warning("ReportPortal API down, cannot proceed")
                         break
