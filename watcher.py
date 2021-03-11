@@ -100,13 +100,13 @@ class Handler(FileSystemEventHandler):
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.brew-build.test.complete"):
             if ('xunit' not in json_object["msg"]):
-                return
-            
-            pattern = re.compile(URL_PATTERN)
-            if (pattern.match(json_object["msg"]["xunit"])):
-                ret = os.system("curl -s "+json_object["msg"]["xunit"]+" > "+xunit_original)
+                ret = os.system("echo '<testsuites></testsuites>' > "+xunit_original)
             else:
-                self.decode_xunit(json_object["msg"]["xunit"], xunit_original)
+                pattern = re.compile(URL_PATTERN)
+                if (pattern.match(json_object["msg"]["xunit"])):
+                    ret = os.system("curl -s "+json_object["msg"]["xunit"]+" > "+xunit_original)
+                else:
+                    self.decode_xunit(json_object["msg"]["xunit"], xunit_original)
 
             with open(task_id+"/"+REPORT_LOG, "a") as report_file:
                 report_file.write(" --------------------------------------------------\n")
@@ -136,13 +136,13 @@ class Handler(FileSystemEventHandler):
 
         if(json_object['topic'] == "VirtualTopic.eng.ci.redhat-module.test.complete"):
             if ('xunit' not in json_object["msg"]):
-                return
-            
-            pattern = re.compile(URL_PATTERN)
-            if (pattern.match(json_object["msg"]["xunit"])):
-                ret = os.system("curl -s "+json_object["msg"]["xunit"]+" > "+xunit_original)
+                ret = os.system("echo '<testsuites></testsuites>' > "+xunit_original)
             else:
-                self.decode_xunit(json_object["msg"]["xunit"], xunit_original)
+                pattern = re.compile(URL_PATTERN)
+                if (pattern.match(json_object["msg"]["xunit"])):
+                    ret = os.system("curl -s "+json_object["msg"]["xunit"]+" > "+xunit_original)
+                else:
+                    self.decode_xunit(json_object["msg"]["xunit"], xunit_original)
 
             with open(task_id+"/"+REPORT_LOG, "a") as report_file:
                 report_file.write(" --------------------------------------------------\n")
