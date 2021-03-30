@@ -49,14 +49,14 @@ class Handler(FileSystemEventHandler):
             # Taken any action here when a file is modified.
             logging.info("Received modified event: %s", event.src_path)
             for filename in sorted(Path(DIRECTORY_TO_WATCH).iterdir(), key=os.path.getmtime):
-                try:
-                    r = requests.head("http://reportportal.osci.redhat.com:8080/api")
-                    if(r.status_code >= 404):
-                        logging.warning("ReportPortal API down, cannot proceed")
-                        break
-                except Exception as exc:
-                    logging.warning("ReportPortal API down(exception), cannot proceed")
-                    break
+                #try:
+                #    r = requests.head("https://reportportal.osci.redhat.com/api")
+                #    if(r.status_code >= 404):
+                #        logging.warning("ReportPortal API down, cannot proceed")
+                #        break
+                #except Exception as exc:
+                #    logging.warning("ReportPortal API down(exception), cannot proceed")
+                #    break
 
                 if os.path.basename(filename).startswith("ID:"):
                     json_file = open(filename, "r")
